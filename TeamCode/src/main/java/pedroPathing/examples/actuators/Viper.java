@@ -1,4 +1,4 @@
-package pedroPathing.examples.intake;
+package pedroPathing.examples.actuators;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -50,9 +50,15 @@ public class Viper {
     public double getPositionMm() {
         return viperTicksToMm(pos);
     }
-    public void runViper() {
+    public void runViper(boolean sequentially) {
         viper.setTargetPosition(pos);
-        ((DcMotorEx) viper).setVelocity(200); // 2500
+        viper.setPower(.2);
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
+        if (!sequentially) {
+            return;
+        }
+        while (viper.isBusy()) {
+            continue;
+        }
     }
 }

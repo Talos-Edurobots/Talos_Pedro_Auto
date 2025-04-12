@@ -1,4 +1,4 @@
-package pedroPathing.examples.intake;
+package pedroPathing.examples.actuators;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -41,9 +41,15 @@ public class Arm {
     public int getPositionDegrees() {
         return armTicksToDegrees(pos);
     }
-    public void runArm() {
+    public void runArm(boolean sequentially) {
         arm.setTargetPosition(pos);
-        ((DcMotorEx) arm).setVelocity(2500);
+        arm.setPower(.7);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
+        if (!sequentially) {
+            return;
+        }
+        while (arm.isBusy()) {
+            continue;
+        }
     }
 }

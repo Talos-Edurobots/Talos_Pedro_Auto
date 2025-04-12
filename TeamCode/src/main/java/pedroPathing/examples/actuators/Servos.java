@@ -1,8 +1,7 @@
-package pedroPathing.examples.intake;
+package pedroPathing.examples.actuators;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 public class Servos {
     Servo intake, wrist;

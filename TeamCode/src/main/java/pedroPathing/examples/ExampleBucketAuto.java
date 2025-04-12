@@ -31,7 +31,7 @@ public class ExampleBucketAuto extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     /** This is the variable where we store the state of our auto.
-     * It is used by the pathUpdate method. */
+     * It is used by the autonomousPathUpdate method. */
     private int pathState;
 
     /* Create and Define Poses + Paths
