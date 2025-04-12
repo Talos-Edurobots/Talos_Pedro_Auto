@@ -24,6 +24,8 @@ public class TalosObservationAutonomous extends OpMode{
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
         servos.intakeCollect();
         servos.wristHorizontal();
+        arm.setPositionDegrees(10);
+        arm.runArm();
     }
 
     @Override
