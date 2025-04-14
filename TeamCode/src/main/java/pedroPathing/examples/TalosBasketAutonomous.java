@@ -14,6 +14,9 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import pedroPathing.examples.actuators.Arm;
+import pedroPathing.examples.actuators.Servos;
+import pedroPathing.examples.actuators.Viper;
 
 /**
  * This is an example auto that showcases movement and control of two servos autonomously.
@@ -25,11 +28,13 @@ import pedroPathing.constants.LConstants;
  * @version 2.0, 11/28/2024
  */
 
-
-@Autonomous(name = "Example Auto Blue", group = "Examples")
-public class ExampleBucketAuto extends OpMode {
+@Autonomous(name = "Red Basket Autonomous", group = "Examples")
+public class TalosBasketAutonomous extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
+    Viper viper; //
+    Arm arm;
+    Servos servos;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the autonomousPathUpdate method. */
@@ -66,11 +71,11 @@ public class ExampleBucketAuto extends OpMode {
      * The Robot will not go to this pose, it is used a control point for our bezier curve. */
     private final Pose parkControlPose = new Pose(60, 98, Math.toRadians(90));
 
-    /** These are our Paths and PathChains that we will define in buildPaths() */
+    /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path scorePreload, park;
     private PathChain grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3;
 
-    /* Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
+    /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
     public void buildPaths() {
 
@@ -261,6 +266,10 @@ public class ExampleBucketAuto extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
+        viper  = new Viper  (this, "viper_motor", hardwareMap, telemetry);
+        arm    = new Arm    ("dc_arm", hardwareMap, telemetry);
+        servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();

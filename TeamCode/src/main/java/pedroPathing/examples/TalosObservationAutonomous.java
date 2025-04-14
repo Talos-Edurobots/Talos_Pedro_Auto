@@ -1,5 +1,6 @@
 package pedroPathing.examples;
 
+import com.pedropathing.pathgen.BezierCurve;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -15,13 +16,18 @@ import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
-
+/** This is the program for the autonomous period on the Observation Zone for this year.
+ * */
 @Autonomous(name="Red Observation Autonomous", group="Examples")
 public class TalosObservationAutonomous extends OpMode {
+    /** We create a Follower object from PedroPathing*/
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
@@ -29,17 +35,42 @@ public class TalosObservationAutonomous extends OpMode {
     Servos servos;
     Viper  viper;
     private final Pose startPose    = new Pose(0,  70, Math.toRadians(0));
-    private final Pose scorePose = new Pose(27, 70, Math.toRadians(0));
-    private final Pose pickup1Pose = new Pose(25, 30, Math.toRadians(0));
-    private PathChain grabPickup1;
+    private final Pose scorePose = new Pose(28.75, 70, Math.toRadians(0));
+    private final Pose controlPoint1 = new Pose(4.5, 44, Math.toRadians(0));
+    private final Pose samplesPose = new Pose(50.3, 37, Math.toRadians(0));
+    private final Pose sample1Pose = new Pose(50.3, 33, Math.toRadians(0));
+    private final Pose attach1Pose = new Pose(10, 33, Math.toRadians(0));
+    private final Pose sample2Pose = new Pose(50.3, 24, Math.toRadians(0));
+    private final Pose attach2Pose = new Pose(10, 27, Math.toRadians(0));
+
+
+    private PathChain grabSamples;
+    private PathChain attach1Sample;
     private Path scorePreload;
     public void buildPaths() {
-        scorePreload= new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
+        scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-        grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+        grabSamples = follower.pathBuilder()
+                .addPath(new BezierCurve(new Point(scorePose), new Point(controlPoint1), new Point(samplesPose)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), samplesPose.getHeading())
+
+                .addPath(new BezierLine(new Point(samplesPose), new Point(sample1Pose)))
+                .setLinearHeadingInterpolation(samplesPose.getHeading(), sample1Pose.getHeading())
+
+                .addPath(new BezierLine(new Point(sample1Pose), new Point(attach1Pose)))
+                .setLinearHeadingInterpolation(sample1Pose.getHeading(), attach1Pose.getHeading())
+
+                .addPath(new BezierLine(new Point(attach1Pose), new Point(sample1Pose)))
+                .setLinearHeadingInterpolation(attach1Pose.getHeading(), sample1Pose.getHeading())
+
+                .addPath(new BezierLine(new Point(sample1Pose), new Point(sample2Pose)))
+                .setLinearHeadingInterpolation(sample1Pose.getHeading(), sample2Pose.getHeading())
+
+                .addPath(new BezierLine(new Point(sample2Pose), new Point(attach2Pose)))
+                .setLinearHeadingInterpolation(sample2Pose.getHeading(), attach2Pose.getHeading())
+
                 .build();
+
     }
 
     public void autonomousPathUpdate() {
@@ -50,10 +81,22 @@ public class TalosObservationAutonomous extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy()) {
-//                    follower.followPath(grabPickup1, true);
-                    arm.setPositionDegrees(70);
+                if (!(follower.isBusy() || arm.arm.isBusy())) {
+                    arm.setPositionDegrees(50);
                     setPathState(2);
+                }
+                break;
+            case 2:
+                if (!arm.arm.isBusy()) {
+                    servos.intakeOpen();
+                    follower.followPath(grabSamples, true);
+                    arm.setPositionDegrees(15);
+                    setPathState(3);
+                }
+                break;
+            case 3:
+                if (!follower.isBusy()) {
+                    setPathState(4);
                 }
                 break;
         }
@@ -67,8 +110,13 @@ public class TalosObservationAutonomous extends OpMode {
     @Override
     public void init() {
         arm    = new Arm    ("dc_arm", hardwareMap, telemetry);
-        viper  = new Viper  ("viper_motor", hardwareMap, telemetry);
+        viper  = new Viper  (this, "viper_motor", hardwareMap, telemetry);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
+        telemetry.addData("Status", "init");
+        telemetry.update();
+        viper.calibrateViper();
+        telemetry.addData("Status", "after_init");
+        telemetry.update();
         servos.intakeCollect();
         servos.wristHorizontal();
         arm.setPositionDegrees(10);
@@ -82,6 +130,11 @@ public class TalosObservationAutonomous extends OpMode {
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
         buildPaths();
+    }
+    @Override
+    public void init_loop(){
+        telemetry.addData("Status", "init_loop");
+        telemetry.update();
     }
 
     @Override
@@ -103,6 +156,14 @@ public class TalosObservationAutonomous extends OpMode {
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.addData("follower busy", follower.isBusy());
+        telemetry.addData("viper current", ((DcMotorEx) viper.viper).getCurrent(CurrentUnit.AMPS));
         telemetry.update();
+    }
+    @Override
+    public void stop() {
+        viper.setPositionTicks(0);
+        arm.setPositionDegrees(0);
+        viper.runViper(true);
+        arm.runArm(true);
     }
 }
