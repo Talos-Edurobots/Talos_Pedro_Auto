@@ -72,12 +72,13 @@ public class Viper {
         do {
             i = timer.milliseconds();
             tel.addData("VIPER CALIBRATE TIME: ", i);
+            tel.update();
             ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
             viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         while (i < 1000);
         viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setPositionTicks(0);
+        setPositionTicks(50);
         runViper(false);
     }
     public void runViper(boolean sequentially) {

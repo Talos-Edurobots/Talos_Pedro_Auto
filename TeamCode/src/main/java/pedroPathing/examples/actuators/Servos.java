@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Servos {
-    Servo intake, wrist;
+    public Servo intake, wrist;
     public Servos(String intakeName, String wristName, HardwareMap hwmap) {
         intake = hwmap.get(Servo.class, intakeName);
         wrist  = hwmap.get(Servo.class, wristName);
