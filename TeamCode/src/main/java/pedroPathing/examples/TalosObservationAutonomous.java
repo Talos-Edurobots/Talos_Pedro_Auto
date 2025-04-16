@@ -37,7 +37,7 @@ public class TalosObservationAutonomous extends OpMode {
     Servos servos;
     Viper  viper;
     private final Pose startPose    = new Pose(0,  70, Math.toRadians(0));
-    private final Pose scorePreloadPose = new Pose(28.75, 70, Math.toRadians(0));
+    private final Pose scorePreloadPose = new Pose(35, 70, Math.toRadians(0));
     private final Pose controlPoint1 = new Pose(4.5, 44, Math.toRadians(0));
     private final Pose samplesPose = new Pose(50.3, 37, Math.toRadians(0));
     private final Pose sample1Pose = new Pose(50.3, 33, Math.toRadians(0));
@@ -48,8 +48,9 @@ public class TalosObservationAutonomous extends OpMode {
     private final Pose attach3Pose = new Pose(10, 18, Math.toRadians(0));
     private final Pose controlPoint2 = new Pose(40, 20, Math.toRadians(0));
     private final Pose preGrabPose = new Pose(12, 30, Math.toRadians(180));
-    private final Pose grabSpecimenPose = new Pose(2, 30, Math.toRadians(180));
-    private final Pose scoreFirstPose = new Pose(28.75, 72, Math.toRadians(0));
+    private final Pose grabSpecimenPose = new Pose(8, 30, Math.toRadians(180));
+    private final Pose controlPoint3 = new Pose(4, 72);
+    private final Pose scoreFirstPose = new Pose(35, 72, Math.toRadians(0));
 
 
     private PathChain attachSamples;
@@ -68,7 +69,7 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample1Pose), new Point(attach1Pose)))
                 .setLinearHeadingInterpolation(sample1Pose.getHeading(), attach1Pose.getHeading())
-                .setPathEndVelocityConstraint(.5)
+                .setPathEndVelocityConstraint(.2)
 
                 .addPath(new BezierLine(new Point(attach1Pose), new Point(sample1Pose)))
                 .setLinearHeadingInterpolation(attach1Pose.getHeading(), sample1Pose.getHeading())
@@ -78,7 +79,7 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample2Pose), new Point(attach2Pose)))
                 .setLinearHeadingInterpolation(sample2Pose.getHeading(), attach2Pose.getHeading())
-                .setPathEndVelocityConstraint(.5)
+                .setPathEndVelocityConstraint(.2)
 
                 .addPath(new BezierLine(new Point(attach2Pose), new Point(sample2Pose)))
                 .setLinearHeadingInterpolation(attach2Pose.getHeading(), sample2Pose.getHeading())
@@ -88,7 +89,7 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
                 .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
-                .setPathEndVelocityConstraint(.5)
+                .setPathEndVelocityConstraint(.2)
                 
                 .build();
 
@@ -102,25 +103,26 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .build();
 
-        scoreFirst = new Path(new BezierLine(new Point(grabSpecimenPose), new Point(scoreFirstPose)));
-        scoreFirst.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreFirstPose.getHeading());
+        scoreFirst = new Path(new BezierCurve(new Point(grabSpecimenPose), new Point(controlPoint3), new Point(scoreFirstPose)));
+        scoreFirst.setTangentHeadingInterpolation();
+//        scoreFirst.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreFirstPose.getHeading());
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
-                arm.setPositionDegrees(90);
+                arm.setPositionDegrees(72);
                 setPathState(1);
                 break;
             case 1:
-                if (!(follower.isBusy() || arm.arm.isBusy())) {
-                    arm.setPositionDegrees(50);
+                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000) && gamepad1.a) {
+//                    arm.setPositionDegrees(75);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (!arm.arm.isBusy()) {
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000) && gamepad1.a) {
                     servos.intakeOpen();
                     follower.followPath(attachSamples, true);
                     arm.setPositionDegrees(15);
@@ -128,35 +130,41 @@ public class TalosObservationAutonomous extends OpMode {
                 }
                 break;
             case 3:
-                if (!follower.isBusy()) {
-                    arm.setPositionDegrees(30);
+                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000) && gamepad1.a) {
+                    arm.setPositionDegrees(26);
                     follower.followPath(grabFirst, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if (!(follower.isBusy()  || arm.arm.isBusy())) {
+                if (!(follower.isBusy()  || arm.arm.isBusy() || pathTimer.getElapsedTime() < 5000) && gamepad1.a) {
                     servos.intakeCollect();
                     setPathState(5);
                 }
                 break;
             case 5:
-                if (pathTimer.getElapsedTime() > 1000) {
-                    arm.setPositionDegrees(50);
-                    follower.followPath(scoreFirst);
-                }
-                break;
-            case 6:
-                if (!(follower.isBusy() || arm.arm.isBusy())) {
-                    arm.setPositionDegrees(90);
+                if ((pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
+                    arm.setPositionDegrees(40);
                     setPathState(6);
                 }
                 break;
-            case 7:
-                if (!arm.arm.isBusy()) {
-                    servos.intakeOpen();
-                    arm.setPositionDegrees(30);
+            case 6:
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
+                    arm.setPositionDegrees(72);
+                    follower.followPath(scoreFirst, true);
                     setPathState(7);
+                }
+                break;
+            case 7:
+                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
+                    servos.intakeOpen();
+//                    arm.setPositionDegrees(30);
+                    setPathState(9);
                 }
                 break;
         }
@@ -213,12 +221,14 @@ public class TalosObservationAutonomous extends OpMode {
 
         // Feedback to Driver Hub
         telemetry.addData("path state", pathState);
+        telemetry.addData("state time", pathTimer.getElapsedTime());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.addData("follower busy", follower.isBusy());
         telemetry.addData("viper current", ((DcMotorEx) viper.viper).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("viper pos",  viper.viper.getCurrentPosition());
+        telemetry.addData("arm degrees", arm.getPositionDegrees());
         telemetry.update();
     }
     @Override

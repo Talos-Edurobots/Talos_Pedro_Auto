@@ -43,7 +43,7 @@ public class Arm {
     }
     public void runArm(boolean sequentially) {
         arm.setTargetPosition(pos);
-        arm.setPower(.7);
+        arm.setPower(1);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
         if (!sequentially) {
             return;
