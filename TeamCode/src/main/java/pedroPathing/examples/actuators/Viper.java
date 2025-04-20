@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 public class Viper {
     public DcMotor viper;
     ElapsedTime timer = new ElapsedTime();
-    public Telemetry tel;
+//    public Telemetry tel;
     private OpMode opMode;
     private int pos; // in ticks
     private int viperCalibrationAmount = 100;
@@ -34,9 +34,9 @@ public class Viper {
         return (ticks / VIPER_TICKS_PER_MM);
     }
 
-    public Viper(OpMode opMode, String name, HardwareMap hwmap, Telemetry tel) {
-        this.tel = tel;
-        this.opMode = opMode;
+    public Viper(String name, HardwareMap hwmap) {
+//        this.tel = tel;
+//        this.opMode = opMode;
         viper = hwmap.get(DcMotor.class, name); //the arm motor
         viper.setDirection(DcMotor.Direction.REVERSE);
         viper.setTargetPosition(0);
@@ -71,8 +71,8 @@ public class Viper {
         double i;
         do {
             i = timer.milliseconds();
-            tel.addData("VIPER CALIBRATE TIME: ", i);
-            tel.update();
+//            tel.addData("VIPER CALIBRATE TIME: ", i);
+//            tel.update();
             ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
             viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class Arm {
     public DcMotor arm;
-    public Telemetry tel;
+//    public Telemetry tel;
     private int pos; // in ticks
     private double armTicksPerDegree = (28 // number of encoder ticks per rotation of the bare motor
                         * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -22,8 +22,8 @@ public class Arm {
         return (int) (ticks / armTicksPerDegree);
     }
 
-    public Arm(String name, HardwareMap hwmap, Telemetry tel) {
-        this.tel = tel;
+    public Arm(String name, HardwareMap hwmap) {
+//        this.tel = tel;
         arm = hwmap.get(DcMotor.class, name); //the arm motor
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ((DcMotorEx) arm).setCurrentAlert(5, CurrentUnit.AMPS);

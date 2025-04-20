@@ -25,6 +25,8 @@ import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
 /** This is the program for the autonomous period on the Observation Zone for this year.
+ * We start at the red side of the field, and we score the preloaded specimen
+ * then we push the three samples to the observation zone and score another specimen.
  * */
 @Autonomous(name="Red Observation Autonomous", group="Examples")
 public class TalosObservationAutonomous extends OpMode {
@@ -36,20 +38,35 @@ public class TalosObservationAutonomous extends OpMode {
     Arm    arm;
     Servos servos;
     Viper  viper;
+    // the starting pose of the robot
     private final Pose startPose    = new Pose(0,  70, Math.toRadians(0));
+    // the pose of the robot when it is going to score the preloaded specimen
     private final Pose scorePreloadPose = new Pose(35, 70, Math.toRadians(0));
+    // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
     private final Pose controlPoint1 = new Pose(4.5, 44, Math.toRadians(0));
+    // the pose of the robot when it is next to the samples and the submersible
     private final Pose samplesPose = new Pose(50.3, 37, Math.toRadians(0));
+    // the pose of the robot when the back side of it is next to the first sample in order to push it in the observation zone
     private final Pose sample1Pose = new Pose(50.3, 33, Math.toRadians(0));
+    // the pose of the robot when it pushes the first sample in the observation zone
     private final Pose attach1Pose = new Pose(14, 33, Math.toRadians(0));
+    // the pose of the robot when the back side of it is next to the second sample in order to push it in the observation zone
     private final Pose sample2Pose = new Pose(50.3, 24, Math.toRadians(0));
+    // the pose of the robot when it pushes the second sample in the observation zone
     private final Pose attach2Pose = new Pose(14, 27, Math.toRadians(0));
+    // the pose of the robot when the back side of it is next to the third sample in order to push it in the observation zone
     private final Pose sample3Pose = new Pose(50.3, 18, Math.toRadians(0));
+    // the pose of the robot when it pushes the third sample in the observation zone
     private final Pose attach3Pose = new Pose(10, 18, Math.toRadians(0));
+    // the control point of the bezier curve that goes from the attach3Pose to the preGrabPose
     private final Pose controlPoint2 = new Pose(40, 20, Math.toRadians(0));
+    // the pose of the robot when it is a bit behind the grabSpecimenPose
     private final Pose preGrabPose = new Pose(12, 30, Math.toRadians(180));
+    // the pose of the robot when it is going to grab the specimen
     private final Pose grabSpecimenPose = new Pose(8, 30, Math.toRadians(180));
+    // the control point of the bezier curve that goes from the grabSpecimenPose to the scoreFirstPose
     private final Pose controlPoint3 = new Pose(4, 72);
+    // the pose of the robot when it is going to score the first specimen
     private final Pose scoreFirstPose = new Pose(35, 72, Math.toRadians(0));
 
 
@@ -69,7 +86,7 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample1Pose), new Point(attach1Pose)))
                 .setLinearHeadingInterpolation(sample1Pose.getHeading(), attach1Pose.getHeading())
-                .setPathEndVelocityConstraint(.2)
+                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
 
                 .addPath(new BezierLine(new Point(attach1Pose), new Point(sample1Pose)))
                 .setLinearHeadingInterpolation(attach1Pose.getHeading(), sample1Pose.getHeading())
@@ -79,7 +96,7 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample2Pose), new Point(attach2Pose)))
                 .setLinearHeadingInterpolation(sample2Pose.getHeading(), attach2Pose.getHeading())
-                .setPathEndVelocityConstraint(.2)
+                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
 
                 .addPath(new BezierLine(new Point(attach2Pose), new Point(sample2Pose)))
                 .setLinearHeadingInterpolation(attach2Pose.getHeading(), sample2Pose.getHeading())
@@ -89,10 +106,9 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
                 .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
-                .setPathEndVelocityConstraint(.2)
-                
-                .build();
+                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
 
+                .build();
 
         grabFirst = follower.pathBuilder()
                 .addPath(new BezierCurve(new Point(attach3Pose), new Point(controlPoint2), new Point(preGrabPose)))
@@ -177,8 +193,8 @@ public class TalosObservationAutonomous extends OpMode {
 
     @Override
     public void init() {
-        arm    = new Arm    ("dc_arm", hardwareMap, telemetry);
-        viper  = new Viper  (this, "viper_motor", hardwareMap, telemetry);
+        arm    = new Arm    ("dc_arm", hardwareMap);
+        viper  = new Viper  ("viper_motor", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
         telemetry.addData("Status", "init");
         telemetry.update();
