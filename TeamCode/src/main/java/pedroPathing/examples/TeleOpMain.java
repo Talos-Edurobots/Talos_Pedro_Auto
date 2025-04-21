@@ -117,11 +117,12 @@ public class TeleOpMain extends LinearOpMode {
             } else if (gamepad2.left_stick_y >= .25) {
                 viperTargetPosition -= (int) (VIPER_EXPANSION_RATE * cycleTime);
             }
+            normalizeActuators();
 
             // driving in filed centric strafer mode
             straferMovement();
             // compensation factor in arm motor position
-            setMinArmPos();
+//            setMinArmPos();
 
             // reading current position of the optical odometry sensor
             pos = otos.getPosition();
@@ -208,7 +209,7 @@ public class TeleOpMain extends LinearOpMode {
              * we set the position as target position
              * we finally run the viper motor
              */
-            viperNormalization();
+//            viperNormalization();
             setViperTargetPosition();
             runViper();
 

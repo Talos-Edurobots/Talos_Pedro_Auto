@@ -41,39 +41,42 @@ public class TalosObservationAutonomous extends OpMode {
     // the starting pose of the robot
     private final Pose startPose    = new Pose(0,  70, Math.toRadians(0));
     // the pose of the robot when it is going to score the preloaded specimen
-    private final Pose scorePreloadPose = new Pose(35, 70, Math.toRadians(0));
+    private final Pose scorePreloadPose = new Pose(29, 70, Math.toRadians(0));
     // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
     private final Pose controlPoint1 = new Pose(4.5, 44, Math.toRadians(0));
     // the pose of the robot when it is next to the samples and the submersible
-    private final Pose samplesPose = new Pose(50.3, 37, Math.toRadians(0));
+    private final Pose samplesPose = new Pose(40, 37, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the first sample in order to push it in the observation zone
-    private final Pose sample1Pose = new Pose(50.3, 33, Math.toRadians(0));
+    private final Pose sample1Pose = new Pose(40, 33, Math.toRadians(0));
     // the pose of the robot when it pushes the first sample in the observation zone
     private final Pose attach1Pose = new Pose(14, 33, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the second sample in order to push it in the observation zone
-    private final Pose sample2Pose = new Pose(50.3, 24, Math.toRadians(0));
+    private final Pose sample2Pose = new Pose(40, 24, Math.toRadians(0));
     // the pose of the robot when it pushes the second sample in the observation zone
     private final Pose attach2Pose = new Pose(14, 27, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the third sample in order to push it in the observation zone
-    private final Pose sample3Pose = new Pose(50.3, 18, Math.toRadians(0));
+    private final Pose sample3Pose = new Pose(40, 17, Math.toRadians(0));
     // the pose of the robot when it pushes the third sample in the observation zone
-    private final Pose attach3Pose = new Pose(10, 18, Math.toRadians(0));
+    private final Pose attach3Pose = new Pose(10, 17, Math.toRadians(0));
     // the control point of the bezier curve that goes from the attach3Pose to the preGrabPose
     private final Pose controlPoint2 = new Pose(40, 20, Math.toRadians(0));
     // the pose of the robot when it is a bit behind the grabSpecimenPose
     private final Pose preGrabPose = new Pose(12, 30, Math.toRadians(180));
     // the pose of the robot when it is going to grab the specimen
-    private final Pose grabSpecimenPose = new Pose(8, 30, Math.toRadians(180));
+    private final Pose grabSpecimenPose = new Pose(10, 30, Math.toRadians(180));
     // the control point of the bezier curve that goes from the grabSpecimenPose to the scoreFirstPose
     private final Pose controlPoint3 = new Pose(4, 72);
     // the pose of the robot when it is going to score the first specimen
-    private final Pose scoreFirstPose = new Pose(35, 72, Math.toRadians(0));
-
+    private final Pose scoreFirstPose = new Pose(29, 71, Math.toRadians(0));
+    private final Pose scoreSecondPose = new Pose(29, 72);
 
     private PathChain attachSamples;
     private Path scorePreload;
-    private PathChain grabFirst;
+    private Path preGrab;
+    private Path grabFirst;
     private Path scoreFirst;
+    private Path grabSecond;
+    private Path scoreSecond;
     public void buildPaths() {
         scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePreloadPose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePreloadPose.getHeading());
@@ -110,77 +113,126 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .build();
 
-        grabFirst = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(attach3Pose), new Point(controlPoint2), new Point(preGrabPose)))
-                .setLinearHeadingInterpolation(attach3Pose.getHeading(), preGrabPose.getHeading())
+        preGrab = new Path(new BezierCurve(new Point(attach3Pose), new Point(controlPoint2), new Point(preGrabPose)));
+        preGrab.setLinearHeadingInterpolation(attach3Pose.getHeading(), preGrabPose.getHeading());
 
-                .addPath(new BezierLine(new Point(preGrabPose), new Point(grabSpecimenPose)))
-                .setLinearHeadingInterpolation(preGrabPose.getHeading(), grabSpecimenPose.getHeading())
+        grabFirst = new Path(new BezierLine(new Point(preGrabPose), new Point(grabSpecimenPose)));
+        grabFirst.setLinearHeadingInterpolation(preGrabPose.getHeading(), grabSpecimenPose.getHeading());
 
-                .build();
+        scoreFirst = new Path(new BezierLine(new Point(grabSpecimenPose), new Point(scoreFirstPose)));
+//        scoreFirst.setTangentHeadingInterpolation();
+        scoreFirst.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreFirstPose.getHeading());
 
-        scoreFirst = new Path(new BezierCurve(new Point(grabSpecimenPose), new Point(controlPoint3), new Point(scoreFirstPose)));
-        scoreFirst.setTangentHeadingInterpolation();
-//        scoreFirst.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreFirstPose.getHeading());
+        grabSecond = new Path(new BezierLine(new Point(scoreFirstPose), new Point(grabSpecimenPose)));
+        grabSecond.setLinearHeadingInterpolation(scoreFirstPose.getHeading(), grabSpecimenPose.getHeading());
+
+        scoreSecond = new Path(new BezierLine(new Point(grabSpecimenPose), new Point(scoreSecondPose)));
+        scoreSecond.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreSecondPose.getHeading());
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
-                arm.setPositionDegrees(72);
+                arm.setPositionDegrees(75);
                 setPathState(1);
                 break;
             case 1:
-                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000) && gamepad1.a) {
-//                    arm.setPositionDegrees(75);
+                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(60);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000) && gamepad1.a) {
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     servos.intakeOpen();
                     follower.followPath(attachSamples, true);
-                    arm.setPositionDegrees(15);
+                    arm.setPositionDegrees(40);
                     setPathState(3);
                 }
                 break;
             case 3:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000) && gamepad1.a) {
-                    arm.setPositionDegrees(26);
-                    follower.followPath(grabFirst, true);
+                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(33);
+                    servos.intakeCollect();
+                    follower.followPath(preGrab, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if (!(follower.isBusy()  || arm.arm.isBusy() || pathTimer.getElapsedTime() < 5000) && gamepad1.a) {
-                    servos.intakeCollect();
+                if (!(follower.isBusy()  || arm.arm.isBusy() || pathTimer.getElapsedTime() < 3000)) {
+                    servos.intakeOpen();
+                    follower.followPath(grabFirst);
+//                    servos.intakeCollect();
                     setPathState(5);
                 }
                 break;
             case 5:
-                if ((pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
-                    arm.setPositionDegrees(40);
+                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    servos.intakeCollect();
                     setPathState(6);
                 }
                 break;
             case 6:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
-                    arm.setPositionDegrees(72);
-                    follower.followPath(scoreFirst, true);
+                if (!(pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(50);
                     setPathState(7);
                 }
                 break;
             case 7:
-                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(75);
+                    follower.followPath(scoreFirst, true);
                     setPathState(8);
                 }
                 break;
             case 8:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() > 1000) && gamepad1.a) {
-                    servos.intakeOpen();
-//                    arm.setPositionDegrees(30);
+                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(60);
                     setPathState(9);
+                }
+                break;
+            case 9:
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    servos.intakeOpen();
+                    arm.setPositionDegrees(33);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                    follower.followPath(grabSecond);
+                    setPathState(11);
+                }
+                break;
+            case 11:
+                if (!(follower.isBusy())) {
+                    setPathState(12);
+                }
+                break;
+            case 12:
+                if (!(pathTimer.getElapsedTime() < 1000)) {
+                    servos.intakeCollect();
+                    setPathState(13);
+                }
+                break;
+            case 13:
+                if (!(pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(75);
+                    follower.followPath(scoreSecond);
+                    setPathState(14);
+                }
+                break;
+            case 14:
+                if (!(pathTimer.getElapsedTime() < 1000 || follower.isBusy())) {
+                    arm.setPositionDegrees(60);
+                    setPathState(15);
+                }
+                break;
+            case 15:
+                if (!(pathTimer.getElapsedTime() < 1000 || arm.arm.isBusy())) {
+                    servos.intakeOpen();
+                    setPathState(16);
                 }
                 break;
         }
@@ -240,8 +292,10 @@ public class TalosObservationAutonomous extends OpMode {
         telemetry.addData("state time", pathTimer.getElapsedTime());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("heading", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("follower busy", follower.isBusy());
+        telemetry.addData("arm busy", follower.isBusy());
+        telemetry.addData("elapsed time < 1000 ", pathTimer.getElapsedTime() < 1000);
         telemetry.addData("viper current", ((DcMotorEx) viper.viper).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("viper pos",  viper.viper.getCurrentPosition());
         telemetry.addData("arm degrees", arm.getPositionDegrees());

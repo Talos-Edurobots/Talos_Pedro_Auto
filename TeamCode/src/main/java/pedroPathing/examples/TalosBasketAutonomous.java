@@ -266,8 +266,8 @@ public class TalosBasketAutonomous extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        viper  = new Viper  (this, "viper_motor", hardwareMap, telemetry);
-        arm    = new Arm    ("dc_arm", hardwareMap, telemetry);
+        viper  = new Viper  ("viper_motor", hardwareMap);
+        arm    = new Arm    ("dc_arm", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
 
         pathTimer = new Timer();
