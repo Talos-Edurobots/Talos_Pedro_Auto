@@ -4,9 +4,9 @@ import com.pedropathing.pathgen.BezierCurve;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import pedroPathing.examples.actuators.Arm;
-import pedroPathing.examples.actuators.Servos;
-import pedroPathing.examples.actuators.Viper;
+import pedroPathing.actuators.Arm;
+import pedroPathing.actuators.Servos;
+import pedroPathing.actuators.Viper;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -89,7 +89,7 @@ public class TalosObservationAutonomous extends OpMode {
 
                 .addPath(new BezierLine(new Point(sample1Pose), new Point(attach1Pose)))
                 .setLinearHeadingInterpolation(sample1Pose.getHeading(), attach1Pose.getHeading())
-                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
+                .setPathEndVelocityConstraint(0.1)
 
                 .addPath(new BezierLine(new Point(attach1Pose), new Point(sample1Pose)))
                 .setLinearHeadingInterpolation(attach1Pose.getHeading(), sample1Pose.getHeading())

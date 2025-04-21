@@ -1,4 +1,4 @@
-package pedroPathing.examples.actuators;
+package pedroPathing.actuators;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;

@@ -14,9 +14,9 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
-import pedroPathing.examples.actuators.Arm;
-import pedroPathing.examples.actuators.Servos;
-import pedroPathing.examples.actuators.Viper;
+import pedroPathing.actuators.Arm;
+import pedroPathing.actuators.Servos;
+import pedroPathing.actuators.Viper;
 
 /**
  * This is an example auto that showcases movement and control of two servos autonomously.
