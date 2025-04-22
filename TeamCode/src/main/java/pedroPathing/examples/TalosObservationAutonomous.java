@@ -41,23 +41,28 @@ public class TalosObservationAutonomous extends OpMode {
     // the starting pose of the robot
     private final Pose startPose    = new Pose(0,  70, Math.toRadians(0));
     // the pose of the robot when it is going to score the preloaded specimen
-    private final Pose scorePreloadPose = new Pose(29, 70, Math.toRadians(0));
+    private final Pose scorePreloadPose = new Pose(28, 70, Math.toRadians(0));
     // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
-    private final Pose controlPoint1 = new Pose(4.5, 44, Math.toRadians(0));
+    private final Pose controlPoint1 = new Pose(4.5, 40, Math.toRadians(0));
     // the pose of the robot when it is next to the samples and the submersible
-    private final Pose samplesPose = new Pose(40, 37, Math.toRadians(0));
+    private final Pose samplesPose = new Pose(45, 38, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the first sample in order to push it in the observation zone
-    private final Pose sample1Pose = new Pose(40, 33, Math.toRadians(0));
+    private final Pose sample1Pose = new Pose(40, 36, Math.toRadians(0));
     // the pose of the robot when it pushes the first sample in the observation zone
-    private final Pose attach1Pose = new Pose(14, 33, Math.toRadians(0));
+    private final Pose sample1ControlPose = new Pose(60, 25, Math.toRadians(0));
+    private final Pose attach1Pose = new Pose(11, 35, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the second sample in order to push it in the observation zone
     private final Pose sample2Pose = new Pose(40, 24, Math.toRadians(0));
     // the pose of the robot when it pushes the second sample in the observation zone
-    private final Pose attach2Pose = new Pose(14, 27, Math.toRadians(0));
+    private final Pose sample2ControlPose = new Pose(90, 18, Math.toRadians(0));
+    private final Pose attach2Pose = new Pose(11, 20, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the third sample in order to push it in the observation zone
     private final Pose sample3Pose = new Pose(40, 17, Math.toRadians(0));
     // the pose of the robot when it pushes the third sample in the observation zone
-    private final Pose attach3Pose = new Pose(10, 17, Math.toRadians(0));
+    private final Pose sample3ControlPose = new Pose(98, 14.5, Math.toRadians(0));
+    private final Pose sample3Control1Pose = new Pose(90, 20, Math.toRadians(0));
+    private final Pose sample3Control2Pose = new Pose(90, 12, Math.toRadians(0));
+    private final Pose attach3Pose = new Pose(12, 12, Math.toRadians(0));
     // the control point of the bezier curve that goes from the attach3Pose to the preGrabPose
     private final Pose controlPoint2 = new Pose(40, 20, Math.toRadians(0));
     // the pose of the robot when it is a bit behind the grabSpecimenPose
@@ -70,8 +75,9 @@ public class TalosObservationAutonomous extends OpMode {
     private final Pose scoreFirstPose = new Pose(29, 71, Math.toRadians(0));
     private final Pose scoreSecondPose = new Pose(29, 72);
 
-    private PathChain attachSamples;
     private Path scorePreload;
+    private Path samples;
+    private PathChain attachSamples;
     private Path preGrab;
     private Path grabFirst;
     private Path scoreFirst;
@@ -80,36 +86,43 @@ public class TalosObservationAutonomous extends OpMode {
     public void buildPaths() {
         scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePreloadPose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePreloadPose.getHeading());
+        samples = new Path(new BezierCurve(new Point(scorePreloadPose), new Point(controlPoint1), new Point(samplesPose)));
+        samples.setLinearHeadingInterpolation(scorePreloadPose.getHeading(), samplesPose.getHeading());
         attachSamples = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(scorePreloadPose), new Point(controlPoint1), new Point(samplesPose)))
-                .setLinearHeadingInterpolation(scorePreloadPose.getHeading(), samplesPose.getHeading())
+                .addPath(new BezierCurve(new Point(samplesPose), new Point(sample1ControlPose), new Point(attach1Pose)))
+                .setLinearHeadingInterpolation(samplesPose.getHeading(), attach1Pose.getHeading())
 
-                .addPath(new BezierLine(new Point(samplesPose), new Point(sample1Pose)))
-                .setLinearHeadingInterpolation(samplesPose.getHeading(), sample1Pose.getHeading())
+                .addPath(new BezierCurve(new Point(attach1Pose), new Point(sample2ControlPose), new Point(attach2Pose)))
+                .setLinearHeadingInterpolation(attach1Pose.getHeading(), attach2Pose.getHeading())
 
-                .addPath(new BezierLine(new Point(sample1Pose), new Point(attach1Pose)))
-                .setLinearHeadingInterpolation(sample1Pose.getHeading(), attach1Pose.getHeading())
-                .setPathEndVelocityConstraint(0.1)
-
-                .addPath(new BezierLine(new Point(attach1Pose), new Point(sample1Pose)))
-                .setLinearHeadingInterpolation(attach1Pose.getHeading(), sample1Pose.getHeading())
-
-                .addPath(new BezierLine(new Point(sample1Pose), new Point(sample2Pose)))
-                .setLinearHeadingInterpolation(sample1Pose.getHeading(), sample2Pose.getHeading())
-
-                .addPath(new BezierLine(new Point(sample2Pose), new Point(attach2Pose)))
-                .setLinearHeadingInterpolation(sample2Pose.getHeading(), attach2Pose.getHeading())
-                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
-
-                .addPath(new BezierLine(new Point(attach2Pose), new Point(sample2Pose)))
-                .setLinearHeadingInterpolation(attach2Pose.getHeading(), sample2Pose.getHeading())
-
-                .addPath(new BezierLine(new Point(sample2Pose), new Point(sample3Pose)))
-                .setLinearHeadingInterpolation(sample2Pose.getHeading(), sample3Pose.getHeading())
-
-                .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
-                .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
-                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
+                .addPath(new BezierCurve(new Point(attach2Pose), new Point(sample3ControlPose), new Point(attach3Pose)))
+                .setLinearHeadingInterpolation(attach2Pose.getHeading(), attach3Pose.getHeading())
+//                .addPath(new BezierLine(new Point(samplesPose), new Point(sample1Pose)))
+//                .setLinearHeadingInterpolation(samplesPose.getHeading(), sample1Pose.getHeading())
+//
+//                .addPath(new BezierLine(new Point(sample1Pose), new Point(attach1Pose)))
+//                .setLinearHeadingInterpolation(sample1Pose.getHeading(), attach1Pose.getHeading())
+//                .setPathEndVelocityConstraint(1)
+//
+//                .addPath(new BezierLine(new Point(attach1Pose), new Point(sample1Pose)))
+//                .setLinearHeadingInterpolation(attach1Pose.getHeading(), sample1Pose.getHeading())
+//
+//                .addPath(new BezierLine(new Point(sample1Pose), new Point(sample2Pose)))
+//                .setLinearHeadingInterpolation(sample1Pose.getHeading(), sample2Pose.getHeading())
+//
+//                .addPath(new BezierLine(new Point(sample2Pose), new Point(attach2Pose)))
+//                .setLinearHeadingInterpolation(sample2Pose.getHeading(), attach2Pose.getHeading())
+//                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
+//
+//                .addPath(new BezierLine(new Point(attach2Pose), new Point(sample2Pose)))
+//                .setLinearHeadingInterpolation(attach2Pose.getHeading(), sample2Pose.getHeading())
+//
+//                .addPath(new BezierLine(new Point(sample2Pose), new Point(sample3Pose)))
+//                .setLinearHeadingInterpolation(sample2Pose.getHeading(), sample3Pose.getHeading())
+//
+//                .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
+//                .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
+//                .setPathEndVelocityConstraint(0.1) // Smooth deceleration
 
                 .build();
 
@@ -146,20 +159,27 @@ public class TalosObservationAutonomous extends OpMode {
             case 2:
                 if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     servos.intakeOpen();
-                    follower.followPath(attachSamples, true);
-                    arm.setPositionDegrees(40);
+                    follower.followPath(samples, true);
                     setPathState(3);
                 }
                 break;
             case 3:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(follower.isBusy())) {
                     arm.setPositionDegrees(33);
-                    servos.intakeCollect();
-                    follower.followPath(preGrab, true);
+                    viper.setPositionMm(100);
+                    follower.followPath(attachSamples, true);
                     setPathState(4);
                 }
                 break;
             case 4:
+                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+//                    arm.setPositionDegrees(33);
+//                    servos.intakeCollect();
+//                    follower.followPath(preGrab, true);
+//                    setPathState(4);
+                }
+                break;
+            case 5:
                 if (!(follower.isBusy()  || arm.arm.isBusy() || pathTimer.getElapsedTime() < 3000)) {
                     servos.intakeOpen();
                     follower.followPath(grabFirst);
@@ -167,69 +187,69 @@ public class TalosObservationAutonomous extends OpMode {
                     setPathState(5);
                 }
                 break;
-            case 5:
+            case 6:
                 if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     servos.intakeCollect();
                     setPathState(6);
                 }
                 break;
-            case 6:
+            case 7:
                 if (!(pathTimer.getElapsedTime() < 1000)) {
                     arm.setPositionDegrees(50);
                     setPathState(7);
                 }
                 break;
-            case 7:
+            case 8:
                 if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     arm.setPositionDegrees(75);
                     follower.followPath(scoreFirst, true);
                     setPathState(8);
                 }
                 break;
-            case 8:
+            case 9:
                 if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     arm.setPositionDegrees(60);
                     setPathState(9);
                 }
                 break;
-            case 9:
+            case 10:
                 if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     servos.intakeOpen();
                     arm.setPositionDegrees(33);
                     setPathState(10);
                 }
                 break;
-            case 10:
+            case 11:
                 if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
                     follower.followPath(grabSecond);
                     setPathState(11);
                 }
                 break;
-            case 11:
+            case 12:
                 if (!(follower.isBusy())) {
                     setPathState(12);
                 }
                 break;
-            case 12:
+            case 13:
                 if (!(pathTimer.getElapsedTime() < 1000)) {
                     servos.intakeCollect();
                     setPathState(13);
                 }
                 break;
-            case 13:
+            case 14:
                 if (!(pathTimer.getElapsedTime() < 1000)) {
                     arm.setPositionDegrees(75);
                     follower.followPath(scoreSecond);
                     setPathState(14);
                 }
                 break;
-            case 14:
+            case 15:
                 if (!(pathTimer.getElapsedTime() < 1000 || follower.isBusy())) {
                     arm.setPositionDegrees(60);
                     setPathState(15);
                 }
                 break;
-            case 15:
+            case 16:
                 if (!(pathTimer.getElapsedTime() < 1000 || arm.arm.isBusy())) {
                     servos.intakeOpen();
                     setPathState(16);

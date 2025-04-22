@@ -117,8 +117,8 @@ public class TeleOpMain extends LinearOpMode {
             } else if (gamepad2.left_stick_y >= .25) {
                 viperTargetPosition -= (int) (VIPER_EXPANSION_RATE * cycleTime);
             }
-            normalizeActuators();
-
+            setMinArmPos();
+            calibrateViper();
             // driving in filed centric strafer mode
             straferMovement();
             // compensation factor in arm motor position
