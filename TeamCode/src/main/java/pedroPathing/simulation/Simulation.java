@@ -4,7 +4,7 @@ import pedroPathing.examples.TeleOpMain;
 
 public class Simulation {
     public static void main(String[] args) {
-        TeleOpMain teleOp = new TeleOpMain();
+        TestableTeleOpMain teleOp = new TestableTeleOpMain();
         // Simulate driver starting the OpMode
         new Thread(() -> {
             try {
@@ -17,7 +17,7 @@ public class Simulation {
         // Simulate inputs
         try {
             Thread.sleep(2000); // wait for init
-//            teleOp.setActive(true);
+            teleOp.setActive(true);
 
             // Simulate gamepad2 pressing up stick (expanding viper)
             teleOp.gamepad2.left_stick_y = -1;
@@ -25,7 +25,7 @@ public class Simulation {
             teleOp.gamepad2.left_stick_y = 0;
 
             Thread.sleep(2000);
-//            teleOp.setActive(false); // stop OpMode
+           teleOp.setActive(false); // stop OpMode
 
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -209,7 +209,7 @@ public class TeleOpMain extends LinearOpMode {
              * we set the position as target position
              * we finally run the viper motor
              */
-//            viperNormalization();
+            viperNormalization();
             setViperTargetPosition();
             runViper();
 
@@ -236,8 +236,6 @@ public class TeleOpMain extends LinearOpMode {
             configureFudge();
             setArmTargetPosition();
             runArm();
-
-
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
             if (((DcMotorEx) armMotor).isOverCurrent()) {
@@ -273,12 +271,13 @@ public class TeleOpMain extends LinearOpMode {
     //    ---------------- | initialization, output | ---------------------------------------------------------------------------------------------------------------------------------------------
     public void initializeIO() {
         /* Define and Initialize Motors */
-        leftFrontDrive = hardwareMap.dcMotor.get("left_front");
-        leftBackDrive = hardwareMap.dcMotor.get("left_back");
+        leftFrontDrive  = hardwareMap.dcMotor.get("left_front");
+        leftBackDrive   = hardwareMap.dcMotor.get("left_back");
         rightFrontDrive = hardwareMap.dcMotor.get("right_front");
-        rightBackDrive = hardwareMap.dcMotor.get("right_back");
-        viperMotor = hardwareMap.dcMotor.get("viper_motor"); // linear viper slide motor
-        armMotor = hardwareMap.get(DcMotor.class, "dc_arm"); //the arm motor
+        rightBackDrive  = hardwareMap.dcMotor.get("right_back");
+        viperMotor      = hardwareMap.dcMotor.get("viper_motor"); // linear viper slide motor
+        armMotor        = hardwareMap.get(DcMotor.class, "dc_arm"); //the arm motor
+
 
         // define the optical odometry sensor object
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
