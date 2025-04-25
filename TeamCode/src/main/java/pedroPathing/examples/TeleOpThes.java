@@ -71,8 +71,7 @@ public class TeleOpThes extends LinearOpMode {
     //odometry sensor
     SparkFunOTOS.Pose2D pos;
     // strafer speed compensation factor
-    double straferSpeedFactor = 1.5;
-    int viperCalibrationAmount = 60;
+    double straferSpeedFactor = 1;
     int minArmPos = 0;
     private static final double TICKS_PER_ARM_DEGREE = 28 // number of encoder ticks per rotation of the bare motor
             * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -107,7 +106,7 @@ public class TeleOpThes extends LinearOpMode {
             // driving in filed centric strafer mode
             straferMovement();
             // compensation factor in arm motor position
-            setMinArmPos();
+//            setMinArmPos();
 
             // reading current position of the optical odometry sensor
             pos = otos.getPosition();
@@ -353,6 +352,7 @@ public class TeleOpThes extends LinearOpMode {
         telemetry.addData("viperMotor Current:",((DcMotorEx) viperMotor).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("arm target Position: ", armMotor.getTargetPosition());
         telemetry.addData("arm current position: ", armMotor.getCurrentPosition());
+        telemetry.addData("arm min position: ", minArmPos);
         //telemetry.addData("viper busy", viperMotor.isBusy());
         telemetry.addData("viper target Position", viperMotor.getTargetPosition());
         telemetry.addData("viper current position", viperMotor.getCurrentPosition());
@@ -531,7 +531,7 @@ public class TeleOpThes extends LinearOpMode {
 
     }
     public void setViperTargetPosition() {
-        viperMotor.setTargetPosition(viperPosition + viperCalibrationAmount);
+        viperMotor.setTargetPosition(viperPosition);
     }
     public void calibrateViper() {
         /*
@@ -617,7 +617,7 @@ public class TeleOpThes extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(3, 0, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.9, 0, -90);
         otos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for

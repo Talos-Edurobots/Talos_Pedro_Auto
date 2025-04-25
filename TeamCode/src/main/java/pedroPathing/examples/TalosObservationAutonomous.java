@@ -39,41 +39,41 @@ public class TalosObservationAutonomous extends OpMode {
     Servos servos;
     Viper  viper;
     // the starting pose of the robot
-    private final Pose startPose    = new Pose(0,  70, Math.toRadians(0)); // x:25.4 cm
+    private final Pose startPose    = new Pose(10,  66.5, Math.toRadians(0)); //
     // the pose of the robot when it is going to score the preloaded specimen
-    private final Pose scorePreloadPose = new Pose(28, 70, Math.toRadians(0));
+    private final Pose scorePreloadPose = new Pose(38, 66.5, Math.toRadians(0));
     // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
-    private final Pose controlPoint1 = new Pose(4.5, 40, Math.toRadians(0));
+    private final Pose controlPoint1 = new Pose(14.5, 36.5, Math.toRadians(0));
     // the pose of the robot when it is next to the samples and the submersible
-    private final Pose samplesPose = new Pose(45, 38, Math.toRadians(0));
+    private final Pose samplesPose = new Pose(55, 34.5, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the first sample in order to push it in the observation zone
-    private final Pose sample1Pose = new Pose(40, 36, Math.toRadians(0));
+    private final Pose sample1Pose = new Pose(50, 32.5, Math.toRadians(0));
     // the pose of the robot when it pushes the first sample in the observation zone
     private final Pose sample1ControlPose = new Pose(60, 25, Math.toRadians(0));
-    private final Pose attach1Pose = new Pose(11, 35, Math.toRadians(0));
+    private final Pose attach1Pose = new Pose(21, 31.5, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the second sample in order to push it in the observation zone
-    private final Pose sample2Pose = new Pose(40, 24, Math.toRadians(0));
+    private final Pose sample2Pose = new Pose(50, 20.5, Math.toRadians(0));
     // the pose of the robot when it pushes the second sample in the observation zone
-    private final Pose sample2ControlPose = new Pose(90, 18, Math.toRadians(0));
-    private final Pose attach2Pose = new Pose(11, 20, Math.toRadians(0));
+    private final Pose sample2ControlPose = new Pose(100, 14.5, Math.toRadians(0));
+    private final Pose attach2Pose = new Pose(21, 16.5, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the third sample in order to push it in the observation zone
-    private final Pose sample3Pose = new Pose(40, 17, Math.toRadians(0));
+    private final Pose sample3Pose = new Pose(50, 13.5, Math.toRadians(0));
     // the pose of the robot when it pushes the third sample in the observation zone
-    private final Pose sample3ControlPose = new Pose(98, 18, Math.toRadians(0));
-    private final Pose sample3Control1Pose = new Pose(90, 20, Math.toRadians(0));
-    private final Pose sample3Control2Pose = new Pose(90, 12, Math.toRadians(0));
-    private final Pose attach3Pose = new Pose(12, 15, Math.toRadians(0));
+    private final Pose sample3ControlPose = new Pose(108, 14.5, Math.toRadians(0));
+    private final Pose sample3Control1Pose = new Pose(94.5, 24.9, Math.toRadians(0));
+    private final Pose sample3Control2Pose = new Pose(71.2, 0.6, Math.toRadians(0));
+    private final Pose attach3Pose = new Pose(22, 11.5, Math.toRadians(0));
     // the control point of the bezier curve that goes from the attach3Pose to the preGrabPose
-    private final Pose controlPoint2 = new Pose(40, 20, Math.toRadians(0));
+    private final Pose controlPoint2 = new Pose(80, 16.5, Math.toRadians(0)); // x: 50
     // the pose of the robot when it is a bit behind the grabSpecimenPose
-    private final Pose preGrabPose = new Pose(12, 30, Math.toRadians(180));
+    private final Pose preGrabPose = new Pose(22, 26.5, Math.toRadians(180));
     // the pose of the robot when it is going to grab the specimen
-    private final Pose grabSpecimenPose = new Pose(1, 30, Math.toRadians(180));
+    private final Pose grabSpecimenPose = new Pose(20, 26.5, Math.toRadians(180));
     // the control point of the bezier curve that goes from the grabSpecimenPose to the scoreFirstPose
-    private final Pose controlPoint3 = new Pose(4, 72);
+    private final Pose controlPoint3 = new Pose(14, 68.5);
     // the pose of the robot when it is going to score the first specimen
-    private final Pose scoreFirstPose = new Pose(29, 71, Math.toRadians(0));
-    private final Pose scoreSecondPose = new Pose(29, 72);
+    private final Pose scoreFirstPose = new Pose(39, 67.5, Math.toRadians(0));
+    private final Pose scoreSecondPose = new Pose(39, 68.5);
 
     private Path scorePreload;
     private Path samples;
@@ -95,13 +95,14 @@ public class TalosObservationAutonomous extends OpMode {
                 .addPath(new BezierCurve(new Point(attach1Pose), new Point(sample2ControlPose), new Point(attach2Pose)))
                 .setLinearHeadingInterpolation(attach1Pose.getHeading(), attach2Pose.getHeading())
 
-                .addPath(new BezierCurve(new Point(attach2Pose), new Point(sample3ControlPose), new Point(attach3Pose)))
+                .addPath(new BezierCurve(new Point(attach2Pose), new Point(sample3Control1Pose), new Point(sample3Control2Pose), new Point(attach3Pose)))
                 .setLinearHeadingInterpolation(attach2Pose.getHeading(), attach3Pose.getHeading())
 
                 .build();
 
         preGrabFirst = new Path(new BezierCurve(new Point(attach3Pose), new Point(controlPoint2), new Point(preGrabPose)));
         preGrabFirst.setLinearHeadingInterpolation(attach3Pose.getHeading(), preGrabPose.getHeading());
+//        preGrabFirst.setTangentHeadingInterpolation();
 
         grab = new Path(new BezierLine(new Point(preGrabPose), new Point(grabSpecimenPose)));
         grab.setLinearHeadingInterpolation(preGrabPose.getHeading(), grabSpecimenPose.getHeading());
@@ -125,13 +126,13 @@ public class TalosObservationAutonomous extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(follower.isBusy() || arm.arm.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
                     arm.setPositionDegrees(60);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 200)) {
                     servos.intakeOpen();
                     follower.followPath(samples, true);
                     setPathState(3);
@@ -139,15 +140,15 @@ public class TalosObservationAutonomous extends OpMode {
                 break;
             case 3:
                 if (!(follower.isBusy())) {
-                    arm.setPositionDegrees(33);
+                    arm.setPositionDegrees(30);
                     viper.setPositionMm(100);
                     follower.followPath(attachSamples, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
-                    arm.setPositionDegrees(31);
+                if (!(follower.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
+                    arm.setPositionDegrees(32);
                     viper.setPositionTicks(50);
                     servos.intakeCollect();
                     follower.followPath(preGrabFirst, true);
@@ -155,15 +156,15 @@ public class TalosObservationAutonomous extends OpMode {
                 }
                 break;
             case 5:
-                if (!(follower.isBusy()  || arm.arm.isBusy() || pathTimer.getElapsedTime() < 3000)) {
-//                    servos.intakeOpen();
-//                    follower.followPath(grab, true);
-////                    servos.intakeCollect();
-//                    setPathState(6);
+                if (!(follower.isBusy()  || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) { // 3000
+                    servos.intakeOpen();
+                    follower.followPath(grab, true);
+//                    servos.intakeCollect();
+                    setPathState(6);
                 }
                 break;
             case 6:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(follower.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
                     servos.intakeCollect();
                     setPathState(7);
                 }
@@ -175,26 +176,26 @@ public class TalosObservationAutonomous extends OpMode {
                 }
                 break;
             case 8:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(arm.arm.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
                     arm.setPositionDegrees(75);
                     follower.followPath(scoreFirst, true);
                     setPathState(9);
                 }
                 break;
             case 9:
-                if (!(follower.isBusy() || arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(follower.isBusy() || arm.arm.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
                     arm.setPositionDegrees(60);
                     setPathState(10);
                 }
                 break;
             case 10:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(arm.arm.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
                     servos.intakeOpen();
-                    setPathState(11);
+//                    setPathState(11);
                 }
                 break;
             case 11:
-                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 200)) {
                     follower.followPath(preGrabSecond);
                     servos.intakeCollect();
                     arm.setPositionDegrees(33);
@@ -208,32 +209,32 @@ public class TalosObservationAutonomous extends OpMode {
                 }
                 break;
             case 13:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 1000)) {
+                if (!(follower.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
                     servos.intakeCollect();
                     setPathState(14);
                 }
                 break;
             case 14:
-                if (!(pathTimer.getElapsedTime() < 1000)) {
+                if (!(pathTimer.getElapsedTime() < 800)) {
                     servos.intakeCollect();
                     setPathState(15);
                 }
                 break;
             case 15:
-                if (!(pathTimer.getElapsedTime() < 1000)) {
+                if (!(pathTimer.getElapsedTime() < 200)) {
                     arm.setPositionDegrees(75);
                     follower.followPath(scoreSecond);
                     setPathState(16);
                 }
                 break;
             case 16:
-                if (!(pathTimer.getElapsedTime() < 1000 || follower.isBusy())) {
+                if (!(follower.isBusy())) { // pathTimer.getElapsedTime() < 1000 ||
                     arm.setPositionDegrees(60);
                     setPathState(17);
                 }
                 break;
             case 17:
-                if (!(pathTimer.getElapsedTime() < 1000 || arm.arm.isBusy())) {
+                if (!(arm.arm.isBusy())) { // pathTimer.getElapsedTime() < 1000 ||
                     servos.intakeOpen();
                     setPathState(18);
                 }
