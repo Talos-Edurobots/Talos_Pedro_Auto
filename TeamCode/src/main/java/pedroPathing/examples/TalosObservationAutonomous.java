@@ -56,27 +56,28 @@ public class TalosObservationAutonomous extends OpMode {
 //    private final Pose samplesPose = new Pose(55, 34.5, Math.toRadians(0));
     private final Pose samplesPose = new Pose(60, 24, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the first sample in order to push it in the observation zone
-    private final Pose sample1Pose = new Pose(60, 30, Math.toRadians(0));
+    private final Pose sample1Pose = new Pose(60, 33, Math.toRadians(0));
     // the pose of the robot when it pushes the first sample in the observation zone
     private final Pose sample1ControlPose = new Pose(60, 25, Math.toRadians(0));
 //    private final Pose attach1Pose = new Pose(21, 31.5, Math.toRadians(0));
-    private final Pose attach1Pose = new Pose(20, 30, Math.toRadians(0));
+    private final Pose attach1Pose = new Pose(30, 33, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the second sample in order to push it in the observation zone
-    private final Pose sample2Pose = new Pose(60, 20, Math.toRadians(0));
+    private final Pose sample2Pose = new Pose(60, 23, Math.toRadians(0));
     // the pose of the robot when it pushes the second sample in the observation zone
 //    private final Pose sample2ControlPose = new Pose(100, 14.5, Math.toRadians(0));
     private final Pose sample2ControlPose = new Pose(60, 30, Math.toRadians(0));
 //    private final Pose attach2Pose = new Pose(21, 16.5, Math.toRadians(0));
-    private final Pose attach2Pose = new Pose(20, 20, Math.toRadians(0));
+    private final Pose attach2Pose = new Pose(30, 23, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the third sample in order to push it in the observation zone
-    private final Pose sample3Pose = new Pose(60, 10, Math.toRadians(0));
+    private final Pose sample3Pose = new Pose(60, 13, Math.toRadians(0));
     // the pose of the robot when it pushes the third sample in the observation zone
     private final Pose sample3ControlPose = new Pose(60, 20, Math.toRadians(0));
     private final Pose sample3Control1Pose = new Pose(94.5, 24.9, Math.toRadians(0));
     private final Pose sample3Control2Pose = new Pose(71.2, 0.6, Math.toRadians(0));
-    private final Pose attach3Pose = new Pose(20, 10, Math.toRadians(0));
+    private final Pose attach3Pose = new Pose(30, 13, Math.toRadians(0));
     // the control point of the bezier curve that goes from the attach3Pose to the preGrabPose
-    private final Pose controlPoint2 = new Pose(80, 16.5, Math.toRadians(0)); // x: 50
+    private final Pose preGrabControlPoint1 = new Pose(60, 15, Math.toRadians(0)); // x: 50
+    private final Pose preGrabControlPoint2 = new Pose(60, 35, Math.toRadians(0)); // x: 50
     // the pose of the robot when it is a bit behind the grabSpecimenPose
     private final Pose preGrabPose = new Pose(22, 26.5, Math.toRadians(180));
     // the pose of the robot when it is going to grab the specimen
@@ -110,15 +111,15 @@ public class TalosObservationAutonomous extends OpMode {
                 .addPath(new BezierLine(new Point(sample2Pose), new Point(attach2Pose)))
                 .setLinearHeadingInterpolation(sample2Pose.getHeading(), attach2Pose.getHeading())
 
-                .addPath(new BezierCurve(new Point(attach2Pose), new Point(sample3ControlPose), new Point(sample3Pose)))
-                .setLinearHeadingInterpolation(attach2Pose.getHeading(), attach3Pose.getHeading())
+//                .addPath(new BezierCurve(new Point(attach2Pose), new Point(sample3ControlPose), new Point(sample3Pose)))
+//                .setLinearHeadingInterpolation(attach2Pose.getHeading(), attach3Pose.getHeading())
 
-                .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
-                .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
+//                .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
+//                .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
 
                 .build();
 
-        preGrabFirst = new Path(new BezierCurve(new Point(attach3Pose), new Point(controlPoint2), new Point(preGrabPose)));
+        preGrabFirst = new Path(new BezierCurve(new Point(attach2Pose), new Point(preGrabControlPoint1), new Point(preGrabControlPoint2), new Point(preGrabPose)));
         preGrabFirst.setLinearHeadingInterpolation(attach3Pose.getHeading(), preGrabPose.getHeading());
 //        preGrabFirst.setTangentHeadingInterpolation();
 
