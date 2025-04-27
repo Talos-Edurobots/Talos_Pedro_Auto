@@ -51,7 +51,7 @@ public class TalosObservationAutonomous extends OpMode {
     // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
 //    private final Pose samplesControlPoint1 = new Pose(14.5, 36.5, Math.toRadians(0));
     private final Pose samplesControlPoint1 = new Pose(9.6, 20.7, Math.toRadians(0));
-    private final Pose samplesControlPoint2 = new Pose(62.7, 42.3, Math.toRadians(0));
+    private final Pose samplesControlPoint2 = new Pose(62.7, 47, Math.toRadians(0));
     // the pose of the robot when it is next to the samples and the submersible
 //    private final Pose samplesPose = new Pose(55, 34.5, Math.toRadians(0));
     private final Pose samplesPose = new Pose(60, 24, Math.toRadians(0));
@@ -87,6 +87,7 @@ public class TalosObservationAutonomous extends OpMode {
     // the pose of the robot when it is going to score the first specimen
     private final Pose scoreFirstPose = new Pose(39, 67.5, Math.toRadians(0));
     private final Pose scoreSecondPose = new Pose(39, 68.5, Math.toRadians(0));
+    private final Pose preGrab2Pose = new Pose(17, 30, Math.toRadians(10));
 
     private Path scorePreload;
     private Path samples;
@@ -130,8 +131,8 @@ public class TalosObservationAutonomous extends OpMode {
 //        scoreFirst.setTangentHeadingInterpolation();
         scoreFirst.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreFirstPose.getHeading());
 
-        preGrabSecond = new Path(new BezierCurve(new Point(scoreFirstPose), new Point(controlPoint3), new Point(preGrabPose)));
-        preGrabSecond.setLinearHeadingInterpolation(scoreFirstPose.getHeading(), preGrabPose.getHeading());
+        preGrabSecond = new Path(new BezierCurve(new Point(scoreFirstPose), new Point(controlPoint3), new Point(preGrab2Pose)));
+        preGrabSecond.setLinearHeadingInterpolation(scoreFirstPose.getHeading(), preGrab2Pose.getHeading());
 
         scoreSecond = new Path(new BezierCurve(new Point(grabSpecimenPose), new Point(controlPoint3), new Point(scoreSecondPose)));
         scoreSecond.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreSecondPose.getHeading());
