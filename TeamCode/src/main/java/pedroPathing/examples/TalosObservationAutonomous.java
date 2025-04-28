@@ -86,8 +86,9 @@ public class TalosObservationAutonomous extends OpMode {
     private final Pose submersibleToObservationControlPoint = new Pose(39, 26.5, Math.toRadians(0)); // observationToSubmersibleControlPoint
     // the pose of the robot when it is going to score the first specimen
     private final Pose observationToSubmersibleControlPoint = new Pose(20, 67.5, Math.toRadians(0));
-    private final Pose scoreFirstPose = new Pose(39, 67.5, Math.toRadians(0));
-    private final Pose scoreSecondPose = new Pose(39, 68.5, Math.toRadians(0));
+    private final Pose scoreFirstPose = new Pose(37, 67.5, Math.toRadians(0));
+    private final Pose grabSecondPose = new Pose(17, 26.5, Math.toRadians(0));
+    private final Pose scoreSecondPose = new Pose(37, 68.5, Math.toRadians(0));
 
     private Path scorePreload;
     private Path samples;
@@ -131,7 +132,7 @@ public class TalosObservationAutonomous extends OpMode {
 //        scoreFirst.setTangentHeadingInterpolation();
         scoreFirst.setLinearHeadingInterpolation(grabSpecimenPose.getHeading(), scoreFirstPose.getHeading());
 
-        grabSecond = new Path(new BezierCurve(new Point(scoreFirstPose), new Point(submersibleToObservationControlPoint), new Point(grabSpecimenPose)));
+        grabSecond = new Path(new BezierCurve(new Point(scoreFirstPose), new Point(submersibleToObservationControlPoint), new Point(grabSecondPose)));
         grabSecond.setLinearHeadingInterpolation(scoreFirstPose.getHeading(), grabSpecimenPose.getHeading());
 
         scoreSecond = new Path(new BezierCurve(new Point(grabSpecimenPose), new Point(observationToSubmersibleControlPoint), new Point(scoreSecondPose)));
