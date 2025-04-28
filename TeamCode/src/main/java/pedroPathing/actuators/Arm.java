@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class Arm {
@@ -18,7 +17,7 @@ public class Arm {
     int armDegreesToTicks(double degrees) {
         return (int) (degrees * armTicksPerDegree);
     }
-    int armTicksToDegrees(int ticks) {
+    double armTicksToDegrees(int ticks) {
         return (int) (ticks / armTicksPerDegree);
     }
 
@@ -35,10 +34,10 @@ public class Arm {
     public void setPositionTicks(int pos) {
         this.pos = pos;
     }
-    public void setPositionDegrees(int position) {
+    public void setPositionDegrees(double position) {
         pos = armDegreesToTicks(position);
     }
-    public int getPositionDegrees() {
+    public double getPositionDegrees() {
         return armTicksToDegrees(pos);
     }
     public void runArm(boolean sequentially) {
