@@ -95,8 +95,17 @@ public class TalosObservationAutonomous extends OpMode {
     private final Pose grabThirdPose = new Pose(17, 26.5, Math.toRadians(160));
     private final Pose scoreThirdPose = new Pose(45, 69.5, Math.toRadians(340));
     private final Pose parkPose = new Pose(10, 40, Math.toRadians(340));
-
-
+    private Thread armGrabWithDelay = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+                arm.setPositionDegrees(ARM_GRAB_SPECIMEN_DEGREES);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    });
     private Path scorePreload;
     private Path samples;
     private PathChain attachSamples;
@@ -238,12 +247,13 @@ public class TalosObservationAutonomous extends OpMode {
                 if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 200)) {
                     follower.followPath(grabSecond);
 //                    servos.intakeCollect();
-                    arm.setPositionDegrees(ARM_GRAB_SPECIMEN_DEGREES);
+//                    arm.setPositionDegrees(ARM_GRAB_SPECIMEN_DEGREES);
+                    armGrabWithDelay.start();
                     setPathState(12);
                 }
                 break;
             case 12:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 5000)) {
+                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 500)) {
 //                    follower.followPath(grabFirst);
                     setPathState(13);
                 }
@@ -282,12 +292,13 @@ public class TalosObservationAutonomous extends OpMode {
             case 18:
                 if (!(pathTimer.getElapsedTime() < 200)) {
                     follower.followPath(grabThird);
-                    arm.setPositionDegrees(ARM_GRAB_SPECIMEN_DEGREES);
+//                    arm.setPositionDegrees(ARM_GRAB_SPECIMEN_DEGREES);
+                    armGrabWithDelay.start();
                     setPathState(19);
                 }
                 break;
             case 19:
-                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 5000)) {
+                if (!(follower.isBusy() || pathTimer.getElapsedTime() < 500)) {
                     servos.intakeCollect();
                     setPathState(20);
                 }
@@ -348,6 +359,8 @@ public class TalosObservationAutonomous extends OpMode {
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
         buildPaths();
+
+//        armGrabWithDelay.start();
     }
     @Override
     public void init_loop(){
