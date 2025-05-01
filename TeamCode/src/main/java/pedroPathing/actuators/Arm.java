@@ -8,16 +8,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class Arm {
     public DcMotor arm;
+    public boolean hardware;
 //    public Telemetry tel;
     private int pos; // in ticks
-    private double armTicksPerDegree = (28 // number of encoder ticks per rotation of the bare motor
+    private static double armTicksPerDegree = (28 // number of encoder ticks per rotation of the bare motor
                         * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
                         * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
                         * 1/360.0);
-    int armDegreesToTicks(double degrees) {
+    static int armDegreesToTicks(double degrees) {
         return (int) (degrees * armTicksPerDegree);
     }
-    double armTicksToDegrees(int ticks) {
+    static double armTicksToDegrees(int ticks) {
         return (int) (ticks / armTicksPerDegree);
     }
 
@@ -25,11 +26,20 @@ public class Arm {
 //        this.tel = tel;
         arm = hwmap.get(DcMotor.class, name); //the arm motor
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hardware = true;
         ((DcMotorEx) arm).setCurrentAlert(5, CurrentUnit.AMPS);
         arm.setTargetPosition(0);
         arm.setDirection(DcMotor.Direction.REVERSE);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    public Arm(String name, HardwareMap hwmap, boolean hardware) {
+        if (hardware) {
+            new Arm(name, hwmap);
+        }
+        else {
+            hardware = false;
+        }
     }
     public void setPositionTicks(int pos) {
         this.pos = pos;
@@ -37,8 +47,27 @@ public class Arm {
     public void setPositionDegrees(double position) {
         pos = armDegreesToTicks(position);
     }
-    public double getPositionDegrees() {
+    public double getCurrentPositionDegrees() {
+        if (hardware){
+        return armTicksToDegrees(arm.getCurrentPosition());
+        }
+        else {
+            return getTargetPositionDegrees();
+        }
+    }
+    public int getCurrentPositionTicks() {
+        if (hardware){
+            return arm.getCurrentPosition();
+        }
+        else {
+            return getTargetPositionTicks();
+        }
+    }
+    public double getTargetPositionDegrees() {
         return armTicksToDegrees(pos);
+    }
+    public int getTargetPositionTicks() {
+        return pos;
     }
     public void runArm(boolean sequentially) {
         arm.setTargetPosition(pos);

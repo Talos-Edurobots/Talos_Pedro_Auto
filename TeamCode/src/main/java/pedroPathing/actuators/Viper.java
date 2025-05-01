@@ -7,10 +7,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class Viper {
+    public boolean hardware;
     public DcMotor viper;
     ElapsedTime timer = new ElapsedTime();
 //    public Telemetry tel;
@@ -27,10 +27,10 @@ public class Viper {
     );
     // to achieve its target 0mm positionn. This has the result the motor to heat up and get stalled and get destroyed. However the viper motor always achieves the target for
     //100mm position and thus doesn't get streesed.
-    int viperMmToTicks(double mm) {
+    static int viperMmToTicks(double mm) {
         return (int) (mm * VIPER_TICKS_PER_MM);
     }
-    double viperTicksToMm(int ticks) {
+    static double viperTicksToMm(int ticks) {
         return (ticks / VIPER_TICKS_PER_MM);
     }
 
@@ -45,16 +45,41 @@ public class Viper {
         viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ((DcMotorEx) viper).setCurrentAlert(5, CurrentUnit.AMPS);
     }
+    public Viper(String name, HardwareMap hwmap, boolean hardware) {
+        if (hardware) {
+            new Arm(name, hwmap);
+        }
+        else {
+            hardware = false;
+        }
+    }
     public void setPositionMm(double position) {
         pos = viperMmToTicks(position);
-//        tel.addData("input", position);
-//        tel.addData("output", pos);
     }
     public void setPositionTicks(int pos) {
         this.pos = pos;
     }
-    public double getPositionMm() {
+    public double getCurrentPositionMm() {
+        if (hardware) {
+            return viperTicksToMm(viper.getCurrentPosition());
+        }
+        else {
+            return getTargetPositionMm();
+        }
+    }
+    public int getCurrentPositionTicks() {
+        if (hardware) {
+            return viper.getCurrentPosition();
+        }
+        else {
+            return getTargetPositionTicks();
+        }
+    }
+    public double getTargetPositionMm() {
         return viperTicksToMm(pos);
+    }
+    public int getTargetPositionTicks() {
+        return pos;
     }
     public void calibrateViper() {
         /*

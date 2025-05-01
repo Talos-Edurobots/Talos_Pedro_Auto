@@ -1,16 +1,16 @@
 package pedroPathing.examples;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import pedroPathing.actuators.*;
+@TeleOp(name = "Actuators Tester", group = "Test")
 public class ActuatorsTester extends LinearOpMode {
+    boolean hardware = false;
     final String ARM_CONFIGURATION    = "dc_arm";
     final String VIPER_CONFIGURATION  = "viper_motor";
     final String INTAKE_CONFIGURATION = "intake_servo";
@@ -20,34 +20,25 @@ public class ActuatorsTester extends LinearOpMode {
             * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
             * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
             * 1/360.0);
-    DcMotor armMotor, viperMotor;
-    Servo intakeServo, wristServo;
+
     SparkFunOTOS otos;
     SparkFunOTOS.Pose2D otosPos;
     Actuators chosenActuator;
-    boolean setPositionMode = true; // true: sets position, false: gets position
+    Arm arm;
+    Viper viper;
+    Servos servos;
+    int viperPosition = 0, armPosition = 0;
+    boolean ArmSetPositionMode = true; // true: sets position, false: gets position
+    boolean ViperSetPositionMode = true; // true: sets position, false: gets position
+    boolean ShowTicks = true; // true: show ticks, false: show degrees/mm
+    double loopTime, oldTime, cycleTime;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        armMotor    = hardwareMap.dcMotor.get(ARM_CONFIGURATION);
-        viperMotor  = hardwareMap.dcMotor.get(VIPER_CONFIGURATION);
-        intakeServo = hardwareMap.servo.  get(INTAKE_CONFIGURATION);
-        wristServo  = hardwareMap.servo.  get(WRIST_CONFIGURATION);
-        otos        = hardwareMap.        get(SparkFunOTOS.class, OTOS_CONFIGURATION);
-
-        armMotor.setTargetPosition(0);
-        armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        viperMotor.setTargetPosition(0);
-        viperMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        viperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        intakeServo.setPosition(0);
-        wristServo.setPosition(0);
-
-        configureOtos();
+        arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
+        viper  = new Viper(VIPER_CONFIGURATION, hardwareMap, hardware);
+//        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap);
+//        configureOtos();
 
         chosenActuator = Actuators.ARM;
         telemetry.addLine("Robot ready.");
@@ -55,23 +46,26 @@ public class ActuatorsTester extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            otosPos = otos.getPosition();
-            armMotor.setPower(.5);
-            viperMotor.setPower(.5);
+//            otosPos = otos.getPosition();
+
 
             switch (chosenActuator) {
                 case ARM:
-                    armMotor.setTargetPosition((int) Math.max(gamepad1.left_stick_y * 1000, gamepad1.right_stick_y * 100));
-                    armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armPosition += (int) (gamepad1.left_stick_y * 1000 * cycleTime);
                     break;
                 case VIPER:
-                    viperMotor.setTargetPosition((int) Math.max(gamepad1.left_stick_y * 1000, gamepad1.right_stick_y * 100));
-                    viperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    viperPosition += (int) (gamepad1.left_stick_y * 1000 * cycleTime);
                     break;
             }
 
-            telemetry.addLine(chosenActuator==Actuators.OTOS ? "--- ":"" + "OTOS Position:\t" + otosPos.toString());
+//            telemetry.addLine(chosenActuator==Actuators.OTOS ? "--- ":"" + "OTOS Position:\t" + otosPos.toString());
+            telemetry.addLine(chosenActuator==Actuators.VIPER ? "--- ":"" + "Viper Position:\t" + (ShowTicks ? viper.getCurrentPositionTicks():viper.getCurrentPositionMm()));
+            telemetry.addLine(chosenActuator==Actuators.ARM ? "--- ":"" + "Arm Position:\t" + (ShowTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()));
             telemetry.update();
+
+            loopTime = getRuntime();
+            cycleTime = loopTime - oldTime;
+            oldTime = loopTime;
         }
     }
     enum Actuators {
