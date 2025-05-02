@@ -8,6 +8,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import pedroPathing.actuators.*;
+import pedroPathing.gamepad.GamepadButtonHandler;
+
 @TeleOp(name = "Actuators Tester", group = "Test")
 public class ActuatorsTester extends LinearOpMode {
     boolean hardware = false;
@@ -23,49 +25,86 @@ public class ActuatorsTester extends LinearOpMode {
 
     SparkFunOTOS otos;
     SparkFunOTOS.Pose2D otosPos;
-    Actuators chosenActuator;
+    Actuators currentActuator;
     Arm arm;
     Viper viper;
     Servos servos;
-    int viperPosition = 0, armPosition = 0;
+    int viperPosition = 0;
+    double armPosition = 0;
     boolean ArmSetPositionMode = true; // true: sets position, false: gets position
     boolean ViperSetPositionMode = true; // true: sets position, false: gets position
-    boolean ShowTicks = true; // true: show ticks, false: show degrees/mm
+    boolean showInTicks = false; // true: show ticks, false: show degrees/mm
     double loopTime, oldTime, cycleTime;
+    GamepadButtonHandler myGamepad = new GamepadButtonHandler();
 
     @Override
     public void runOpMode() throws InterruptedException {
         arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
         viper  = new Viper(VIPER_CONFIGURATION, hardwareMap, hardware);
-//        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap);
+        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
+        if (hardware) {
+            configureOtos();
+        }
 //        configureOtos();
 
-        chosenActuator = Actuators.ARM;
+        currentActuator = Actuators.ARM;
         telemetry.addLine("Robot ready.");
         telemetry.update();
 
         waitForStart();
         while (opModeIsActive()) {
 //            otosPos = otos.getPosition();
+            sleep(10);
 
-
-            switch (chosenActuator) {
+            switch (currentActuator) {
                 case ARM:
-                    armPosition += (int) (gamepad1.left_stick_y * 1000 * cycleTime);
+                    armPosition -= (gamepad1.left_stick_y * 1000 * cycleTime);
+                    armPosition -= (gamepad1.right_stick_y * 100 * cycleTime);
+                    if (armPosition < 0) {
+                        armPosition = 0;
+                        gamepad1.rumbleBlips(3);
+                    }
+                    if (myGamepad.a.justPressed(gamepad1.a)) {
+
+                    }
                     break;
                 case VIPER:
-                    viperPosition += (int) (gamepad1.left_stick_y * 1000 * cycleTime);
+                    viperPosition -= (int) (gamepad1.left_stick_y * 1000 * cycleTime);
+                    viperPosition -= (int) (gamepad1.right_stick_y * 100 * cycleTime);
+                    if (viperPosition < 0) {
+                        viperPosition = 0;
+                        gamepad1.rumble(500);
+                        gamepad1.rumble(1000);
+                    }
                     break;
             }
+            arm.setPositionTicks((int) armPosition);
+            viper.setPositionTicks(viperPosition);
 
-//            telemetry.addLine(chosenActuator==Actuators.OTOS ? "--- ":"" + "OTOS Position:\t" + otosPos.toString());
-            telemetry.addLine(chosenActuator==Actuators.VIPER ? "--- ":"" + "Viper Position:\t" + (ShowTicks ? viper.getCurrentPositionTicks():viper.getCurrentPositionMm()));
-            telemetry.addLine(chosenActuator==Actuators.ARM ? "--- ":"" + "Arm Position:\t" + (ShowTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()));
-            telemetry.update();
+            if (myGamepad.dpad_up.justPressed(gamepad1.dpad_up)) {
+                previousActuator();
+            }
+            if (myGamepad.dpad_down.justPressed(gamepad1.dpad_down)) {
+                nextActuator();
+            }
+            if (myGamepad.y.justPressed(gamepad1.y)) {
+                showInTicks ^= true;
+            }
 
+            myGamepad.update(gamepad1);
             loopTime = getRuntime();
             cycleTime = loopTime - oldTime;
             oldTime = loopTime;
+
+
+            telemetry.addLine((currentActuator==Actuators.ARM ? "--- ":"") + "Arm Position:\t" + (int)(showInTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()) + (showInTicks ? " ticks":" degrees"));
+            telemetry.addLine(((currentActuator==Actuators.VIPER ? "--- ":"") + "Viper Position:\t") + (int)(showInTicks ? viper.getCurrentPositionTicks():viper.getCurrentPositionMm()) + (showInTicks ? " ticks":" mm"));
+            telemetry.addLine((currentActuator==Actuators.OTOS ? "--- ":"") + (hardware ? "OTOS Position:\t" + otosPos.toString():"Disabled OTOS"));
+            telemetry.addLine();
+            telemetry.addData("cycle time", cycleTime);
+            telemetry.addData("running time", getRuntime());
+            telemetry.addData("is rumbling", gamepad1.isRumbling());
+            telemetry.update();
         }
     }
     enum Actuators {
@@ -75,6 +114,29 @@ public class ActuatorsTester extends LinearOpMode {
         WRIST,
         OTOS
     };
+
+    void nextActuator() {
+        Actuators[] actuators = Actuators.values();
+        int index = currentActuator.ordinal();
+        if (index < actuators.length -1) {
+            currentActuator = actuators[index + 1];
+        }
+        else {
+            currentActuator = actuators[0];
+        }
+    }
+
+    void previousActuator() {
+        Actuators[] actuators = Actuators.values();
+        int index = currentActuator.ordinal();
+        if (index > 0) {
+            currentActuator = actuators[index - 1];
+        }
+        else {
+            currentActuator = actuators[actuators.length-1];
+        }
+    }
+
     void configureOtos() {
 //        telemetry.addLine("Configuring OTOS...");
 //        telemetry.update();

@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 public class Arm {
     public DcMotor arm;
     public boolean hardware;
+    public boolean relaxed;
 //    public Telemetry tel;
     private int pos; // in ticks
     private static double armTicksPerDegree = (28 // number of encoder ticks per rotation of the bare motor
@@ -70,6 +71,7 @@ public class Arm {
         return pos;
     }
     public void runArm(boolean sequentially) {
+        relaxed = false;
         arm.setTargetPosition(pos);
         arm.setPower(1);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
@@ -78,6 +80,13 @@ public class Arm {
         }
         while (arm.isBusy()) {
             continue;
+        }
+    }
+    public void relax() {
+        if (hardware) {
+            arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            arm.setPower(0);
+            relaxed = true;
         }
     }
 }
