@@ -9,6 +9,7 @@ public class Servos {
     public Servos(String intakeName, String wristName, HardwareMap hwmap) {
         intake = hwmap.get(Servo.class, intakeName);
         wrist  = hwmap.get(Servo.class, wristName);
+        hardware = true;
     }
     public Servos(String intakeName, String wristName, HardwareMap hwmap, boolean hardware) {
         if (hardware) {

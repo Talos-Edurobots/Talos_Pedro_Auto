@@ -50,7 +50,7 @@ public class TalosBasketAutonomous extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     /** Start Pose of our robot */
-    private final Pose startPose = new Pose(9, 111, Math.toRadians(270));
+    private final Pose startPose = new Pose(10, 111, Math.toRadians(270));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
     private final Pose scorePose = new Pose(14, 129, Math.toRadians(315));
@@ -174,8 +174,8 @@ public class TalosBasketAutonomous extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup1,true);
-                    setPathState(3);
+//                    follower.followPath(scorePickup1,true);
+//                    setPathState(3);
                 }
                 break;
             case 3:

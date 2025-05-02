@@ -433,7 +433,8 @@ public class TeleOpThes extends LinearOpMode {
         armPosition = armDegreesToTicks(85); // 165
     }
     public void armScoreSampleInHigh() {
-        armPosition = armDegreesToTicks(110);
+        armPosition = armDegreesToTicks(110); // 110
+        wrist.setPosition(0);
     } // 90
     public void armAttachHangingHook() {
         armPosition = armDegreesToTicks(120);

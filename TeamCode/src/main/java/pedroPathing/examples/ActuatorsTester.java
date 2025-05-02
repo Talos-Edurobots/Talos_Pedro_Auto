@@ -12,7 +12,7 @@ import pedroPathing.gamepad.GamepadButtonHandler;
 
 @TeleOp(name = "Actuators Tester", group = "Test")
 public class ActuatorsTester extends LinearOpMode {
-    boolean hardware = false;
+    boolean hardware = true;
     final String ARM_CONFIGURATION    = "dc_arm";
     final String VIPER_CONFIGURATION  = "viper_motor";
     final String INTAKE_CONFIGURATION = "intake_servo";
@@ -39,13 +39,13 @@ public class ActuatorsTester extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
+        arm    = new Arm(ARM_CONFIGURATION, hardwareMap);
         viper  = new Viper(VIPER_CONFIGURATION, hardwareMap, hardware);
-        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
+        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap);
         if (hardware) {
+            otos = hardwareMap.get(SparkFunOTOS.class, "otos");
             configureOtos();
         }
-//        configureOtos();
 
         currentActuator = Actuators.ARM;
         telemetry.addLine("Robot ready.");
@@ -65,7 +65,7 @@ public class ActuatorsTester extends LinearOpMode {
                         gamepad1.rumbleBlips(3);
                     }
                     if (myGamepad.a.justPressed(gamepad1.a)) {
-
+                        arm.relaxed ^= true;
                     }
                     break;
                 case VIPER:
@@ -78,8 +78,16 @@ public class ActuatorsTester extends LinearOpMode {
                     }
                     break;
             }
+
             arm.setPositionTicks((int) armPosition);
             viper.setPositionTicks(viperPosition);
+
+            if (arm.relaxed) {
+                arm.relax();
+            }
+            else {
+                arm.runArm(false);
+            }
 
             if (myGamepad.dpad_up.justPressed(gamepad1.dpad_up)) {
                 previousActuator();
@@ -97,7 +105,7 @@ public class ActuatorsTester extends LinearOpMode {
             oldTime = loopTime;
 
 
-            telemetry.addLine((currentActuator==Actuators.ARM ? "--- ":"") + "Arm Position:\t" + (int)(showInTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()) + (showInTicks ? " ticks":" degrees"));
+            telemetry.addLine((currentActuator==Actuators.ARM ? "--- ":"") + "Arm Position:\t" + (int)(showInTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()) + (showInTicks ? " ticks":" degrees") + "\t" + "relaxed: " + arm.relaxed);
             telemetry.addLine(((currentActuator==Actuators.VIPER ? "--- ":"") + "Viper Position:\t") + (int)(showInTicks ? viper.getCurrentPositionTicks():viper.getCurrentPositionMm()) + (showInTicks ? " ticks":" mm"));
             telemetry.addLine((currentActuator==Actuators.OTOS ? "--- ":"") + (hardware ? "OTOS Position:\t" + otosPos.toString():"Disabled OTOS"));
             telemetry.addLine();
