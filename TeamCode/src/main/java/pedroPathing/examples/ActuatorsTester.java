@@ -12,7 +12,7 @@ import pedroPathing.gamepad.GamepadButtonHandler;
 
 @TeleOp(name = "Actuators Tester", group = "Test")
 public class ActuatorsTester extends LinearOpMode {
-    boolean hardware = true;
+    boolean hardware = false;
     final String ARM_CONFIGURATION    = "dc_arm";
     final String VIPER_CONFIGURATION  = "viper_motor";
     final String INTAKE_CONFIGURATION = "intake_servo";

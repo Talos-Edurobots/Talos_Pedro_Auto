@@ -52,7 +52,7 @@ public class TalosObservationAutonomous extends OpMode {
     private final Pose scorePreloadPose = new Pose(38, 66.5, Math.toRadians(0));
     // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
 //    private final Pose samplesControlPoint1 = new Pose(14.5, 36.5, Math.toRadians(0));
-    private final Pose samplesControlPoint1 = new Pose(9.6, 20.7, Math.toRadians(0));
+    private final Pose samplesControlPoint1 = new Pose(6, 20.7, Math.toRadians(0));
     private final Pose samplesControlPoint2 = new Pose(62.7, 47, Math.toRadians(0));
     // the pose of the robot when it is next to the samples and the submersible
 //    private final Pose samplesPose = new Pose(55, 34.5, Math.toRadians(0));

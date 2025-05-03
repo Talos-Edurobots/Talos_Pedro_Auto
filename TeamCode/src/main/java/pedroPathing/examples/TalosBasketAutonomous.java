@@ -11,6 +11,9 @@ import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
@@ -35,6 +38,9 @@ public class TalosBasketAutonomous extends OpMode {
     Viper viper; //
     Arm arm;
     Servos servos;
+    final double ARM_SCORE_DEGREES = 105;
+    final double VIPER_SCORE_MM= 530;
+
 
     /** This is the variable where we store the state of our auto.
      * It is used by the autonomousPathUpdate method. */
@@ -50,13 +56,14 @@ public class TalosBasketAutonomous extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     /** Start Pose of our robot */
-    private final Pose startPose = new Pose(10, 111, Math.toRadians(270));
+    private final Pose startPose = new Pose(10, 111, Math.toRadians(0));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(14, 129, Math.toRadians(315));
+    private final Pose scorePose = new Pose(20.5, 123.5, Math.toRadians(135));
+    private final Pose score1ControlPose = new Pose(40, 80, Math.toRadians(135));
 
     /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(35, 115, Math.toRadians(0));
 
     /** Middle (Second) Sample from the Spike Mark */
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
@@ -95,7 +102,7 @@ public class TalosBasketAutonomous extends OpMode {
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
 
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
+        scorePreload = new Path(new BezierCurve(new Point(startPose), new Point(score1ControlPose), new Point(scorePose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         /* Here is an example for Constant Interpolation
@@ -148,93 +155,80 @@ public class TalosBasketAutonomous extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreload);
+                follower.followPath(scorePreload, true);
                 setPathState(1);
                 break;
             case 1:
-
                 /* You could check for
                 - Follower State: "if(!follower.isBusy() {}"
                 - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
                 - Robot Position: "if(follower.getPose().getX() > 36) {}"
                 */
 
+
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
                     /* Score Preload */
-
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1,true);
+//                    follower.followPath(grabPickup1,true);
                     setPathState(2);
                 }
                 break;
             case 2:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-//                    follower.followPath(scorePickup1,true);
-//                    setPathState(3);
+                if(!arm.arm.isBusy()) {
+                    viper.setPositionMm(VIPER_SCORE_MM);
+                    setPathState(3);
                 }
                 break;
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup2,true);
+                if(!viper.viper.isBusy()) {
+                    servos.intakeOpen();
                     setPathState(4);
                 }
                 break;
             case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup2,true);
-                    setPathState(5);
+                if(!viper.viper.isBusy()) {
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
                 }
-                break;
             case 5:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup3,true);
+                if(!(arm.arm.isBusy())) {
+                    viper.setPositionTicks(20);
                     setPathState(6);
                 }
                 break;
             case 6:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup3, true);
+                if(!viper.viper.isBusy()) {
+                    arm.setPositionDegrees(0);
                     setPathState(7);
                 }
                 break;
             case 7:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are parked */
-                    follower.followPath(park,true);
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
+                if(!arm.arm.isBusy()) {
+                    follower.followPath(grabPickup1, true);
                     setPathState(8);
                 }
                 break;
             case 8:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
-                    /* Level 1 Ascent */
-
-                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
+                    viper.setPositionMm(50);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if(!viper.viper.isBusy()) {
+                    servos.intakeCollect();
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if(!(pathTimer.getElapsedTime() < 1000)) {
+                    viper.setPositionTicks(50);
+                    setPathState(11);
                 }
                 break;
         }
@@ -254,12 +248,21 @@ public class TalosBasketAutonomous extends OpMode {
         // These loop the movements of the robot
         follower.update();
         autonomousPathUpdate();
+        arm.runArm(false);
+        viper.runViper(false);
 
-        // Feedback to Driver Hub
         telemetry.addData("path state", pathState);
+        telemetry.addData("state time", pathTimer.getElapsedTime());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("follower busy", follower.isBusy());
+        telemetry.addData("arm busy", follower.isBusy());
+        telemetry.addData("elapsed time < 1000 ", pathTimer.getElapsedTime() < 1000);
+        telemetry.addData("viper current", ((DcMotorEx) viper.viper).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("viper pos",  viper.viper.getCurrentPosition());
+        telemetry.addData("arm degrees", arm.getCurrentPositionDegrees());
+        telemetry.update();
         telemetry.update();
     }
 
@@ -277,12 +280,18 @@ public class TalosBasketAutonomous extends OpMode {
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
+        servos.intakeCollect();
+        servos.wristHorizontal();
+        viper.calibrateViper();
         buildPaths();
     }
 
     /** This method is called continuously after Init while waiting for "play". **/
     @Override
-    public void init_loop() {}
+    public void init_loop() {
+        telemetry.addData("Status", "Waiting for start");
+        telemetry.update();
+    }
 
     /** This method is called once at the start of the OpMode.
      * It runs all the setup actions, including building paths and starting the path system **/
