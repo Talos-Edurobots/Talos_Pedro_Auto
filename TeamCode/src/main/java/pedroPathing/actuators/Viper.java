@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class Viper {
     public boolean hardware;
+    private boolean relaxed;
     public DcMotor viper;
     ElapsedTime timer = new ElapsedTime();
 //    public Telemetry tel;
@@ -33,10 +34,7 @@ public class Viper {
     static double viperTicksToMm(int ticks) {
         return (ticks / VIPER_TICKS_PER_MM);
     }
-
-    public Viper(String name, HardwareMap hwmap) {
-//        this.tel = tel;
-//        this.opMode = opMode;
+    void init(String name, HardwareMap hwmap) {
         viper = hwmap.get(DcMotor.class, name); //the arm motor
         viper.setDirection(DcMotor.Direction.REVERSE);
         viper.setTargetPosition(0);
@@ -45,9 +43,13 @@ public class Viper {
         viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ((DcMotorEx) viper).setCurrentAlert(5, CurrentUnit.AMPS);
     }
+
+    public Viper(String name, HardwareMap hwmap) {
+        init(name, hwmap);
+    }
     public Viper(String name, HardwareMap hwmap, boolean hardware) {
         if (hardware) {
-            new Arm(name, hwmap);
+            init(name, hwmap);
         }
         else {
             hardware = false;
@@ -89,24 +91,33 @@ public class Viper {
          * viper slide is collapsed, the viper slide motor will stall. This piece of code runs the motor
          * in order to get stalled for 1 second. Then I reset the motor and I set the current position to 0
          */
-        timer.reset();
-        viper.setTargetPosition(viperMmToTicks(-500));
-        ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
-        viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        double i;
-        do {
-            i = timer.milliseconds();
+        relaxed = false;
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                timer.reset();
+                viper.setTargetPosition(viperMmToTicks(-500));
+                ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
+                viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                double i;
+                do {
+                    i = timer.milliseconds();
 //            tel.addData("VIPER CALIBRATE TIME: ", i);
 //            tel.update();
-            ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
-            viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
-        while (i < 1000);
-        viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setPositionTicks(50);
-        runViper(false);
+                    ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
+                    viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
+                while (i < 1000);
+                viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setPositionTicks(50);
+                Viper.this.run(false);
+            }
+        };
+        thread.start();
     }
-    public void runViper(boolean sequentially) {
+    public void run(boolean sequentially) {
+
+        relaxed = false;
         viper.setTargetPosition(pos);
         viper.setPower(.5);
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
@@ -116,5 +127,30 @@ public class Viper {
         while (viper.isBusy()) {
             continue;
         }
+    }
+    public void relax() {
+        relaxed = true;
+        viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        viper.setPower(0);
+    }
+    public void update() {
+        if (!hardware) {
+            return;
+        }
+        if (relaxed) {
+            relax();
+            return;
+        }
+        run(false);
+    }
+
+    public boolean isRelaxed() {
+        return relaxed;
+    }
+    public void setRelaxed(boolean relaxed) {
+        this.relaxed = relaxed;
+    }
+    public void changeState() {
+        relaxed ^= true;
     }
 }

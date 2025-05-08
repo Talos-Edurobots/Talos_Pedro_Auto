@@ -30,8 +30,7 @@ import pedroPathing.constants.LConstants;
  * */
 
 /**
- * todo - add 2 inches to the y coords of sample pos
-
+ *
 */
 @Autonomous(name="Red Observation Autonomous", group="Examples")
 public class TalosObservationAutonomous extends OpMode {
@@ -135,7 +134,9 @@ public class TalosObservationAutonomous extends OpMode {
 //                .setLinearHeadingInterpolation(attach2Pose.getHeading(), attach3Pose.getHeading())
 
 //                .addPath(new BezierLine(new Point(sample3Pose), new Point(attach3Pose)))
-//                .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading())
+//                .setLinearHeadingInterpolation(sample3Pose.getHeading(), attach3Pose.getHeading(
+//                ))
+//                .setPathEndTimeoutConstraint(0)
 
                 .build();
 
@@ -347,7 +348,7 @@ public class TalosObservationAutonomous extends OpMode {
         servos.intakeCollect();
         servos.wristHorizontal();
         arm.setPositionDegrees(10);
-        arm.runArm(false);
+        arm.run(false);
         viper.calibrateViper();
 
         pathTimer = new Timer();
@@ -376,8 +377,8 @@ public class TalosObservationAutonomous extends OpMode {
     public void loop() {
         follower.update();
         autonomousPathUpdate();
-        arm.runArm(false);
-        viper.runViper(false);
+        arm.run(false);
+        viper.run(false);
 
 
         // Feedback to Driver Hub
@@ -398,7 +399,7 @@ public class TalosObservationAutonomous extends OpMode {
     public void stop() {
         viper.setPositionTicks(0);
         arm.setPositionDegrees(0);
-        viper.runViper(false);
-        arm.runArm(false);
+        viper.run(false);
+        arm.run(false);
     }
 }

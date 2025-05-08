@@ -38,10 +38,10 @@ public class ActuatorsTester extends LinearOpMode {
     GamepadButtonHandler myGamepad = new GamepadButtonHandler();
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        arm    = new Arm(ARM_CONFIGURATION, hardwareMap);
+    public void runOpMode() {
+        arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
         viper  = new Viper(VIPER_CONFIGURATION, hardwareMap, hardware);
-        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap);
+        servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
         if (hardware) {
             otos = hardwareMap.get(SparkFunOTOS.class, "otos");
             configureOtos();
@@ -53,8 +53,11 @@ public class ActuatorsTester extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-//            otosPos = otos.getPosition();
             sleep(10);
+
+            if (hardware) {
+                otosPos = otos.getPosition();
+            }
 
             switch (currentActuator) {
                 case ARM:
@@ -65,7 +68,7 @@ public class ActuatorsTester extends LinearOpMode {
                         gamepad1.rumbleBlips(3);
                     }
                     if (myGamepad.a.justPressed(gamepad1.a)) {
-                        arm.relaxed ^= true;
+                        arm.changeState();
                     }
                     break;
                 case VIPER:
@@ -76,19 +79,23 @@ public class ActuatorsTester extends LinearOpMode {
                         gamepad1.rumble(500);
                         gamepad1.rumble(1000);
                     }
+                    if (myGamepad.a.justPressed(gamepad1.a)) {
+                        viper.changeState();
+                    }
                     break;
+                case INTAKE:
+                    servos.setIntakePosition(servos.getIntakePosition() + gamepad1.left_stick_y * cycleTime);
+                    servos.setIntakePosition(servos.getIntakePosition() + gamepad1.right_stick_y * cycleTime * .1f);
+                case WRIST:
+                    servos.setWristPosition(servos.getWristPosition() + gamepad1.left_stick_y * cycleTime);
+                    servos.setWristPosition(servos.getWristPosition() + gamepad1.right_stick_y * cycleTime * .1f);
             }
 
             arm.setPositionTicks((int) armPosition);
             viper.setPositionTicks(viperPosition);
 
-            if (arm.relaxed) {
-                arm.relax();
-            }
-            else {
-                arm.runArm(false);
-            }
-
+            arm.update();
+            viper.update();
             if (myGamepad.dpad_up.justPressed(gamepad1.dpad_up)) {
                 previousActuator();
             }
@@ -103,10 +110,17 @@ public class ActuatorsTester extends LinearOpMode {
             loopTime = getRuntime();
             cycleTime = loopTime - oldTime;
             oldTime = loopTime;
+            telemetry.addLine("*** keybindings ***");
+            telemetry.addLine("dpad up: previous actuator");
+            telemetry.addLine("dpad down: next actuator");
+            telemetry.addLine("y: toggle show in other unit (e.g. ticks/degrees)");
+            telemetry.addLine("a: change mode (e.g. set position/get position)");
+            telemetry.addLine("\n**********");
 
-
-            telemetry.addLine((currentActuator==Actuators.ARM ? "--- ":"") + "Arm Position:\t" + (int)(showInTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()) + (showInTicks ? " ticks":" degrees") + "\t" + "relaxed: " + arm.relaxed);
-            telemetry.addLine(((currentActuator==Actuators.VIPER ? "--- ":"") + "Viper Position:\t") + (int)(showInTicks ? viper.getCurrentPositionTicks():viper.getCurrentPositionMm()) + (showInTicks ? " ticks":" mm"));
+            telemetry.addLine((currentActuator==Actuators.ARM ? "--- ":"") + "Arm Position:\t" + (int)(showInTicks ? arm.getCurrentPositionTicks():arm.getCurrentPositionDegrees()) + (showInTicks ? " ticks":" degrees") + ", \t" + "floating: " + arm.isRelaxed());
+            telemetry.addLine(((currentActuator==Actuators.VIPER ? "--- ":"") + "Viper Position:\t") + (int)(showInTicks ? viper.getCurrentPositionTicks():viper.getCurrentPositionMm()) + (showInTicks ? " ticks":" mm") + ", \t" + "floating: " + viper.isRelaxed());
+            telemetry.addLine((currentActuator==Actuators.INTAKE ? "--- ":"") + "Intake Position:	" + servos.getIntakePosition());
+            telemetry.addLine((currentActuator==Actuators.WRIST ? "--- ":"") + "Wrist Position:	" + servos.getWristPosition());
             telemetry.addLine((currentActuator==Actuators.OTOS ? "--- ":"") + (hardware ? "OTOS Position:\t" + otosPos.toString():"Disabled OTOS"));
             telemetry.addLine();
             telemetry.addData("cycle time", cycleTime);
