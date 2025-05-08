@@ -551,7 +551,7 @@ public class TeleOpThes extends LinearOpMode {
         runViper();
     }
     public void runViper() {
-        ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide
+        ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide in ticks/s
         viperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 

@@ -27,7 +27,7 @@ public class ActuatorsTester extends LinearOpMode {
     SparkFunOTOS.Pose2D otosPos;
     Actuators currentActuator;
     Arm arm;
-    Viper viper;
+    GobildaViper viper;
     Servos servos;
     int viperPosition = 0;
     double armPosition = 0;
@@ -40,7 +40,7 @@ public class ActuatorsTester extends LinearOpMode {
     @Override
     public void runOpMode() {
         arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
-        viper  = new Viper(VIPER_CONFIGURATION, hardwareMap, hardware);
+        viper  = new GobildaViper(VIPER_CONFIGURATION, hardwareMap, hardware);
         servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
         if (hardware) {
             otos = hardwareMap.get(SparkFunOTOS.class, "otos");

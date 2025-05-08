@@ -19,7 +19,7 @@ import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 import pedroPathing.actuators.Arm;
 import pedroPathing.actuators.Servos;
-import pedroPathing.actuators.Viper;
+import pedroPathing.actuators.GobildaViper;
 
 /**
  * This is an example auto that showcases movement and control of two servos autonomously.
@@ -35,7 +35,7 @@ import pedroPathing.actuators.Viper;
 public class TalosBasketAutonomous extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    Viper viper; //
+    GobildaViper viper; //
     Arm arm;
     Servos servos;
     final double ARM_SCORE_DEGREES = 105;
@@ -248,8 +248,8 @@ public class TalosBasketAutonomous extends OpMode {
         // These loop the movements of the robot
         follower.update();
         autonomousPathUpdate();
-        arm.runArm(false);
-        viper.runViper(false);
+        arm.run(false);
+        viper.run(false);
 
         telemetry.addData("path state", pathState);
         telemetry.addData("state time", pathTimer.getElapsedTime());
@@ -269,7 +269,7 @@ public class TalosBasketAutonomous extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        viper  = new Viper  ("viper_motor", hardwareMap);
+        viper  = new GobildaViper("viper_motor", hardwareMap);
         arm    = new Arm    ("dc_arm", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
 

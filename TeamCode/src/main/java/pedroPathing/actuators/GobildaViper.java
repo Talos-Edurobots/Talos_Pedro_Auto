@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class Viper {
+public class GobildaViper {
     public boolean hardware;
     private boolean relaxed;
     public DcMotor viper;
@@ -44,10 +44,10 @@ public class Viper {
         ((DcMotorEx) viper).setCurrentAlert(5, CurrentUnit.AMPS);
     }
 
-    public Viper(String name, HardwareMap hwmap) {
+    public GobildaViper(String name, HardwareMap hwmap) {
         init(name, hwmap);
     }
-    public Viper(String name, HardwareMap hwmap, boolean hardware) {
+    public GobildaViper(String name, HardwareMap hwmap, boolean hardware) {
         if (hardware) {
             init(name, hwmap);
         }
@@ -110,23 +110,22 @@ public class Viper {
                 while (i < 1000);
                 viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 setPositionTicks(50);
-                Viper.this.run(false);
+                GobildaViper.this.run(false);
             }
         };
         thread.start();
     }
-    public void run(boolean sequentially) {
+    public void run(boolean usingPower) {
 
         relaxed = false;
         viper.setTargetPosition(pos);
-        viper.setPower(.5);
+        if (usingPower) {
+            viper.setPower(.5);
+        }
+        else {
+            ((DcMotorEx) viper).setVelocity(3000);
+        }
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
-        if (!sequentially) {
-            return;
-        }
-        while (viper.isBusy()) {
-            continue;
-        }
     }
     public void relax() {
         relaxed = true;

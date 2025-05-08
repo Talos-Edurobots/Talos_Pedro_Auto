@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.actuators.Arm;
 import pedroPathing.actuators.Servos;
-import pedroPathing.actuators.Viper;
+import pedroPathing.actuators.GobildaViper;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -41,7 +41,7 @@ public class TalosObservationAutonomous extends OpMode {
     private int pathState;
     Arm    arm;
     Servos servos;
-    Viper  viper;
+    GobildaViper viper;
     final double ARM_GRAB_SPECIMEN_DEGREES = 30.5;
     final double ARM_ATTACH_TO_BAR_DEGREES = 77;
     final double ARM_SCORE_DEGREES = 60;
@@ -339,7 +339,7 @@ public class TalosObservationAutonomous extends OpMode {
     @Override
     public void init() {
         arm    = new Arm    ("dc_arm", hardwareMap);
-        viper  = new Viper  ("viper_motor", hardwareMap);
+        viper  = new GobildaViper("viper_motor", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
         telemetry.addData("Status", "init");
         telemetry.update();
