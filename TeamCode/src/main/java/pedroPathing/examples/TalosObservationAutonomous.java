@@ -391,8 +391,9 @@ public class TalosObservationAutonomous extends OpMode {
         telemetry.addData("arm busy", follower.isBusy());
         telemetry.addData("elapsed time < 1000 ", pathTimer.getElapsedTime() < 1000);
         telemetry.addData("viper current", ((DcMotorEx) viper.viper).getCurrent(CurrentUnit.AMPS));
-        telemetry.addData("viper pos",  viper.viper.getCurrentPosition());
+        telemetry.addData("viper pos",  viper.getCurrentPositionMm());
         telemetry.addData("arm degrees", arm.getCurrentPositionDegrees());
+        telemetry.addData("follower error", follower.driveError);
         telemetry.update();
     }
     @Override
