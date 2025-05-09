@@ -30,24 +30,37 @@ public class Test extends OpMode {
     Follower follower;
     int pathState;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    Pose startPose = new Pose(0, 0, Point.CARTESIAN);
-    Pose endPose = new Pose(0, 0, Point.CARTESIAN);
+    Pose startPose = new Pose(0, 0, 0);
+    Pose endPose = new Pose(0, 0, Math.toRadians(180));
     Path targetPose;
 
     @Override
     public void init() {
-        setPathState(0);
         Constants.setConstants(FConstants.class, LConstants.class);
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
-        buildPaths();
+        setPathState(0);
+        follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
+        buildPaths();
     }
 
     @Override
     public void loop() {
         autonomousPathUpdate();
+        follower.update();
+
+        telemetry.addData("path state", pathState);
+        telemetry.addData("state time", pathTimer.getElapsedTime());
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("follower busy", follower.isBusy());
+        telemetry.addData("arm busy", follower.isBusy());
+        telemetry.addData("elapsed time < 1000 ", pathTimer.getElapsedTime() < 1000);
+        telemetry.addData("follower error", follower.driveError);
+        telemetry.update();
     }
     public void buildPaths() {
         targetPose = new Path(new BezierLine(new Point(startPose), new Point(endPose)));
