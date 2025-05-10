@@ -86,7 +86,7 @@ public class Arm {
         }
         relaxed = false;
         arm.setTargetPosition(pos);
-        arm.setPower(1);
+        arm.setPower(.5);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
         if (!sequentially) {

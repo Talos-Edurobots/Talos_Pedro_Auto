@@ -62,29 +62,31 @@ public class TalosBasketAutonomous extends OpMode {
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
 
     private final Pose preScorePose = new Pose(30, 120, Math.toRadians(135));
-    private final Pose scorePreloadPose = new Pose(23.7, 117, Math.toRadians(135));
-    private final Pose score1ControlPose = new Pose(30, 80, Math.toRadians(135));
+    private final Pose scorePreloadPose = new Pose(23, 119, Math.toRadians(135));
+    private final Pose scorePreloadControlPose = new Pose(26, 81, Math.toRadians(135));
 
     /** Lowest (First) Sample from the Spike Mark */
     private final Pose pickup1Pose = new Pose(30, 113, Math.toRadians(0));
     private final Pose pickup1ControlPose = new Pose(10, 90, Math.toRadians(0));
-    private final Pose scorePickup1ControlPose = new Pose(10, 100, Math.toRadians(0));
-    private final Pose scoreGrab1Pose = new Pose(16.5, 116.5, Math.toRadians(135));
+    private final Pose scorePickup1ControlPose = new Pose(9, 101, Math.toRadians(0));
+    private final Pose scoreGrab1Pose = new Pose(17, 117, Math.toRadians(135));
+    private final Pose scorePickup2ControlPose = new Pose(30, 100, Math.toRadians(0));
 
     /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(33, 126, Math.toRadians(0));
-    private final Pose scoreGrab2Pose = new Pose(17, 116, Math.toRadians(135));
+    private final Pose pickup2Pose = new Pose(33.5, 126.3, Math.toRadians(0));
+    private final Pose pickup2ControlPose = new Pose(10, 90, Math.toRadians(0));
+    private final Pose scoreGrab2Pose = new Pose(22, 120, Math.toRadians(135));
 
     /** Highest (Third) Sample from the Spike Mark */
-    private final Pose pickup3Pose = new Pose(49, 122, Math.toRadians(90));
-    private final Pose scoreGrab3Pose = new Pose(17, 116, Math.toRadians(135));
+    private final Pose pickup3Pose = new Pose(49, 123.25, Math.toRadians(90));
+    private final Pose scoreGrab3Pose = new Pose(17.5, 116, Math.toRadians(135));
 
     /** Park Pose for our robot, after we do all of the scoring. */
-    private final Pose parkPose = new Pose(60, 98, Math.toRadians(90));
+    private final Pose parkPose = new Pose(68, 88, Math.toRadians(90));
 
     /** Park Control Pose for our robot, this is used to manipulate the bezier curve that we will create for the parking.
      * The Robot will not go to this pose, it is used a control point for our bezier curve. */
-    private final Pose parkControlPose = new Pose(60, 98, Math.toRadians(90));
+    private final Pose parkControlPose = new Pose(80, 100, Math.toRadians(90));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path park, test;
@@ -111,7 +113,7 @@ public class TalosBasketAutonomous extends OpMode {
 
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
         scorePreload = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(startPose), new Point(score1ControlPose), new Point(scorePreloadPose)))
+                .addPath(new BezierCurve(new Point(startPose), new Point(scorePreloadControlPose), new Point(scorePreloadPose)))
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePreloadPose.getHeading())
 
 //                .addPath(new BezierLine(new Point(preScorePose), new Point(scorePose)))
@@ -144,7 +146,7 @@ public class TalosBasketAutonomous extends OpMode {
 
         /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(pickup2Pose), new Point(pickup1ControlPose), new Point(scoreGrab2Pose)))
+                .addPath(new BezierCurve(new Point(pickup2Pose), new Point(scorePickup2ControlPose), new Point(scoreGrab2Pose)))
                 .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scoreGrab2Pose.getHeading())
                 .build();
 
@@ -161,8 +163,8 @@ public class TalosBasketAutonomous extends OpMode {
                 .build();
 
         /* This is our park path. We are using a BezierCurve with 3 points, which is a curved line that is curved based off of the control point */
-        park = new Path(new BezierCurve(new Point(scorePreloadPose), /* Control Point */ new Point(parkControlPose), new Point(parkPose)));
-        park.setLinearHeadingInterpolation(scorePreloadPose.getHeading(), parkPose.getHeading());
+        park = new Path(new BezierCurve(new Point(scoreGrab3Pose), /* Control Point */ new Point(parkControlPose), new Point(parkPose)));
+        park.setLinearHeadingInterpolation(scoreGrab3Pose.getHeading(), parkPose.getHeading());
     }
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
@@ -172,6 +174,7 @@ public class TalosBasketAutonomous extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload, true);
+                arm.setPositionDegrees(ARM_SCORE_DEGREES);
 //                follower.followPath(test, true);
                 setPathState(1);
                 break;
@@ -186,7 +189,6 @@ public class TalosBasketAutonomous extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
                     /* Score Preload */
-                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
 //                    follower.followPath(grabPickup1,true);
                     setPathState(2);
@@ -253,13 +255,13 @@ public class TalosBasketAutonomous extends OpMode {
             case 11:
                 if(!viper.viper.isBusy()) {
                     follower.followPath(scorePickup1, true);
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     setPathState(12);
                 }
                 break;
             case 12:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if(!follower.isBusy()) {
-                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     setPathState(13);
                 }
                 break;
@@ -323,13 +325,13 @@ public class TalosBasketAutonomous extends OpMode {
             case 22:
                 if(!viper.viper.isBusy()) {
                     follower.followPath(scorePickup2, true);
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     setPathState(23);
                 }
                 break;
             case 23:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if(!follower.isBusy()) {
-                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     setPathState(24);
                 }
                 break;
@@ -393,9 +395,48 @@ public class TalosBasketAutonomous extends OpMode {
             case 33:
                 if(!viper.viper.isBusy()) {
                     follower.followPath(scorePickup3, true);
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
                     setPathState(34);
                 }
                 break;
+            case 34:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
+                if(!follower.isBusy()) {
+                    setPathState(35);
+                }
+                break;
+            case 35:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(!arm.arm.isBusy()) {
+                    viper.setPositionMm(VIPER_SCORE_MM);
+                    setPathState(36);
+                }
+                break;
+            case 36:
+                if(!viper.viper.isBusy()) {
+                    servos.intakeOpen();
+                    setPathState(37);
+                }
+                break;
+            case 37:
+                if(!(pathTimer.getElapsedTime() < 1000)) {
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
+                    setPathState(38);
+                }
+                break;
+            case 38:
+                if(!(arm.arm.isBusy())) {
+                    viper.setPositionTicks(20);
+                    setPathState(39);
+                }
+                break;
+            case 39:
+                if(!viper.viper.isBusy()) {
+                    follower.followPath(park, true);
+                    setPathState(40);
+                }
+                break;
+
         }
     }
 
