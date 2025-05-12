@@ -120,7 +120,7 @@ public class GobildaViper {
         relaxed = false;
         viper.setTargetPosition(pos);
         if (usingPower) {
-            viper.setPower(.5);
+            viper.setPower(1);
         }
         else {
             ((DcMotorEx) viper).setVelocity(3000);

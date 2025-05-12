@@ -39,7 +39,7 @@ public class TalosBasketAutonomous extends OpMode {
     Arm arm;
     Servos servos;
     final double ARM_SCORE_DEGREES = 107;
-    final double VIPER_SCORE_MM= 570;
+    final double VIPER_SCORE_MM= 500;
 
 
     /** This is the variable where we store the state of our auto.
@@ -73,16 +73,16 @@ public class TalosBasketAutonomous extends OpMode {
     private final Pose scorePickup2ControlPose = new Pose(30, 100, Math.toRadians(0));
 
     /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(33.5, 126.3, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(33, 126, Math.toRadians(0));
     private final Pose pickup2ControlPose = new Pose(10, 90, Math.toRadians(0));
-    private final Pose scoreGrab2Pose = new Pose(22, 120, Math.toRadians(135));
+    private final Pose scoreGrab2Pose = new Pose(22.5, 120, Math.toRadians(135));
 
     /** Highest (Third) Sample from the Spike Mark */
-    private final Pose pickup3Pose = new Pose(49, 123.25, Math.toRadians(90));
-    private final Pose scoreGrab3Pose = new Pose(17.5, 116, Math.toRadians(135));
+    private final Pose pickup3Pose = new Pose(49, 123.5, Math.toRadians(90));
+    private final Pose scoreGrab3Pose = new Pose(18, 118, Math.toRadians(135));
 
     /** Park Pose for our robot, after we do all of the scoring. */
-    private final Pose parkPose = new Pose(68, 88, Math.toRadians(90));
+    private final Pose parkPose = new Pose(65, 98, Math.toRadians(90));
 
     /** Park Control Pose for our robot, this is used to manipulate the bezier curve that we will create for the parking.
      * The Robot will not go to this pose, it is used a control point for our bezier curve. */
@@ -91,6 +91,7 @@ public class TalosBasketAutonomous extends OpMode {
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path park, test;
     private PathChain scorePreload, grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3;
+    private boolean viperMode = false;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -209,7 +210,7 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 4:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 500)) {
                     arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
                     setPathState(5);
                 }
@@ -222,13 +223,13 @@ public class TalosBasketAutonomous extends OpMode {
                 break;
             case 6:
                 if(!viper.viper.isBusy()) {
-                    arm.setPositionDegrees(0);
                     setPathState(7);
                 }
                 break;
             case 7:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
                 if(!arm.arm.isBusy()) {
+                    arm.setPositionDegrees(0);
                     follower.followPath(grabPickup1, true);
                     setPathState(8);
                 }
@@ -247,7 +248,7 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 10:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     viper.setPositionTicks(50);
                     setPathState(11);
                 }
@@ -265,7 +266,7 @@ public class TalosBasketAutonomous extends OpMode {
                     setPathState(13);
                 }
                 break;
-                case 13:
+            case 13:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!arm.arm.isBusy()) {
                     viper.setPositionMm(VIPER_SCORE_MM);
@@ -279,7 +280,7 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 15:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
                     setPathState(16);
                 }
@@ -292,13 +293,13 @@ public class TalosBasketAutonomous extends OpMode {
                 break;
             case 17:
                 if(!viper.viper.isBusy()) {
-                    arm.setPositionDegrees(0);
                     setPathState(18);
                 }
                 break;
             case 18:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
                 if(!arm.arm.isBusy()) {
+                    arm.setPositionDegrees(0);
                     follower.followPath(grabPickup2, true);
                     setPathState(19);
                 }
@@ -317,7 +318,7 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 21:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     viper.setPositionTicks(50);
                     setPathState(22);
                 }
@@ -349,7 +350,7 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 26:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
                     setPathState(27);
                 }
@@ -362,13 +363,13 @@ public class TalosBasketAutonomous extends OpMode {
                 break;
             case 28:
                 if(!viper.viper.isBusy()) {
-                    arm.setPositionDegrees(0);
                     setPathState(29);
                 }
                 break;
             case 29:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
                 if(!arm.arm.isBusy()) {
+                    arm.setPositionDegrees(0);
                     follower.followPath(grabPickup3, true);
                     setPathState(30);
                 }
@@ -387,7 +388,7 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 32:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     viper.setPositionTicks(50);
                     setPathState(33);
                 }
@@ -419,14 +420,14 @@ public class TalosBasketAutonomous extends OpMode {
                 }
                 break;
             case 37:
-                if(!(pathTimer.getElapsedTime() < 1000)) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
                     setPathState(38);
                 }
                 break;
             case 38:
                 if(!(arm.arm.isBusy())) {
-                    viper.setPositionTicks(20);
+                    viper.setPositionMm(30);
                     setPathState(39);
                 }
                 break;
@@ -436,7 +437,19 @@ public class TalosBasketAutonomous extends OpMode {
                     setPathState(40);
                 }
                 break;
-
+            case 40:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
+                if(!follower.isBusy()) {
+                    viper.setPositionTicks(50);
+                    setPathState(41);
+                }
+                break;
+            case 41:
+                if(!viper.viper.isBusy()) {
+                    arm.setPositionDegrees(150);
+                    setPathState(42);
+                }
+                break;
         }
     }
 
@@ -455,7 +468,7 @@ public class TalosBasketAutonomous extends OpMode {
         follower.update();
         autonomousPathUpdate();
         arm.run(false);
-        viper.run(false);
+        viper.run(viperMode);
 
         telemetry.addData("path state", pathState);
         telemetry.addData("state time", pathTimer.getElapsedTime());
@@ -468,7 +481,8 @@ public class TalosBasketAutonomous extends OpMode {
         telemetry.addData("viper current", ((DcMotorEx) viper.viper).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("viper pos",  viper.viper.getCurrentPosition());
         telemetry.addData("arm degrees", arm.getCurrentPositionDegrees());
-        telemetry.update();
+        telemetry.addData("intake pos", servos.intake.getPosition());
+        telemetry.addData("wrist pos", servos.wrist.getPosition());
         telemetry.update();
     }
 
