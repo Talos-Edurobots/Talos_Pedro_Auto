@@ -217,17 +217,17 @@ public class TalosBasketAutonomous extends OpMode {
             case 5:
                 if(!(arm.arm.isBusy())) {
                     viper.setPositionTicks(20);
+                    follower.followPath(grabPickup1, true);
                     setPathState(6);
                 }
                 break;
             case 6:
-                if(viper.getCurrentPositionMm() < 200) {
+                if(!(viper.getCurrentPositionTicks() > 25 || pathTimer.getElapsedTime() < 1500)) {
+                    arm.setPositionDegrees(0);
                     setPathState(7);
                 }
                 break;
             case 7:
-                arm.setPositionDegrees(0);
-                follower.followPath(grabPickup1, true);
                 setPathState(8);
 
                 break;
@@ -278,19 +278,19 @@ public class TalosBasketAutonomous extends OpMode {
             case 16:
                 if(!(arm.arm.isBusy())) {
                     viper.setPositionTicks(20);
+                    follower.followPath(grabPickup2, true);
                     setPathState(17);
                 }
                 break;
             case 17:
-                if(viper.getCurrentPositionMm() < 200) {
+                if(!(viper.getCurrentPositionMm() > 100 || pathTimer.getElapsedTime() < 1500)) {
+                    arm.setPositionDegrees(0);
                     setPathState(18);
                 }
                 break;
             case 18:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
 
-                arm.setPositionDegrees(0);
-                follower.followPath(grabPickup2, true);
                 setPathState(19);
 
                 break;
@@ -342,19 +342,19 @@ public class TalosBasketAutonomous extends OpMode {
             case 27:
                 if(!(arm.arm.isBusy())) {
                     viper.setPositionTicks(20);
+                    follower.followPath(grabPickup3, true);
                     setPathState(28);
                 }
                 break;
             case 28:
-                if(viper.getCurrentPositionMm() < 200) {
+                if(!(viper.getCurrentPositionMm() > 100 || pathTimer.getElapsedTime() < 1500)) {
+                    arm.setPositionDegrees(0);
                     setPathState(29);
                 }
                 break;
             case 29:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
 
-                arm.setPositionDegrees(0);
-                follower.followPath(grabPickup3, true);
                 setPathState(30);
 
                 break;
@@ -454,7 +454,7 @@ public class TalosBasketAutonomous extends OpMode {
         follower.update();
         autonomousPathUpdate();
         arm.update();
-        viper.update();
+        viper.run(true);
 
         telemetry.addData("path state", pathState);
         telemetry.addData("state time", pathTimer.getElapsedTime());
