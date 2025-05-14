@@ -49,6 +49,7 @@ public class GobildaViper {
     }
     public GobildaViper(String name, HardwareMap hwmap, boolean hardware) {
         if (hardware) {
+            hardware = true;
             init(name, hwmap);
         }
         else {
@@ -110,21 +111,18 @@ public class GobildaViper {
                 while (i < 1000);
                 viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 setPositionTicks(50);
-                GobildaViper.this.run(false);
+                GobildaViper.this.run();
             }
         };
         thread.start();
     }
-    public void run(boolean usingPower) {
+    public void run() {
 
         relaxed = false;
         viper.setTargetPosition(pos);
-        if (usingPower) {
-            viper.setPower(1);
-        }
-        else {
-            ((DcMotorEx) viper).setVelocity(3000);
-        }
+
+        ((DcMotorEx) viper).setVelocity(3000);
+
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }
     public void relax() {
@@ -140,7 +138,7 @@ public class GobildaViper {
             relax();
             return;
         }
-        run(false);
+        run();
     }
 
     public boolean isRelaxed() {

@@ -454,7 +454,7 @@ public class TalosBasketAutonomous extends OpMode {
         follower.update();
         autonomousPathUpdate();
         arm.update();
-        viper.run(true);
+        viper.run();
 
         telemetry.addData("path state", pathState);
         telemetry.addData("state time", pathTimer.getElapsedTime());
