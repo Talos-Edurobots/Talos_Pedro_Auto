@@ -346,6 +346,7 @@ public class TeleOpThes extends LinearOpMode {
     }
 
     public void output(){
+        telemetry.addData("Motor Current:",((DcMotorEx) leftBackDrive).getCurrent(CurrentUnit.AMPS));
         /* send telemetry to the driver of the arm's current position and target position */
         telemetry.addLine("Version: Android 5 orfanak");
         telemetry.addData("armMotor Current:",((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
