@@ -12,6 +12,7 @@ public class Arm {
     private boolean relaxed;
     //    public Telemetry tel;
     private int pos; // in ticks
+    private int velocity = 2500;
     private static double armTicksPerDegree = (28 // number of encoder ticks per rotation of the bare motor
             * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
             * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
@@ -80,21 +81,18 @@ public class Arm {
         return pos;
     }
 
-    public void run(boolean sequentially) {
+    public void run() {
         if (!hardware) {
             return;
         }
         relaxed = false;
         arm.setTargetPosition(pos);
-        arm.setPower(.7);
+        ((DcMotorEx) arm).setVelocity(2500); // 2500
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
-        if (!sequentially) {
-            return;
-        }
-        while (arm.isBusy()) {
-            continue;
-        }
+    }
+    public void setVelocity(int vel) {
+        velocity = vel;
     }
 
     public void relax() {
@@ -107,7 +105,7 @@ public class Arm {
     }
     public void update() {
         if (hardware) {
-            run(false);
+            run();
         }
         else {
             relax();

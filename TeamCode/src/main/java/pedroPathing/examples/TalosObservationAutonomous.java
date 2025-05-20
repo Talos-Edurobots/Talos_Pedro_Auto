@@ -348,7 +348,7 @@ public class TalosObservationAutonomous extends OpMode {
         servos.intakeCollect();
         servos.wristHorizontal();
         arm.setPositionDegrees(10);
-        arm.run(false);
+        arm.run();
         viper.calibrateViper();
 
         pathTimer = new Timer();
@@ -377,8 +377,8 @@ public class TalosObservationAutonomous extends OpMode {
     public void loop() {
         follower.update();
         autonomousPathUpdate();
-        arm.run(false);
-        viper.run(false);
+        arm.run();
+        viper.run();
 
 
         // Feedback to Driver Hub
@@ -400,7 +400,7 @@ public class TalosObservationAutonomous extends OpMode {
     public void stop() {
         viper.setPositionTicks(0);
         arm.setPositionDegrees(0);
-        viper.run(false);
-        arm.run(false);
+        viper.run();
+        arm.run();
     }
 }
