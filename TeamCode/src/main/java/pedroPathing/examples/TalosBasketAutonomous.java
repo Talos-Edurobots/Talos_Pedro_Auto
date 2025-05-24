@@ -10,8 +10,10 @@ import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
@@ -475,7 +477,7 @@ public class TalosBasketAutonomous extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        viper  = new GobildaViper("viper_motor", hardwareMap);
+        viper  = new GobildaViper("viper_motor", hardwareMap, DcMotor.Direction.REVERSE, true);
         arm    = new Arm    ("dc_arm", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
 

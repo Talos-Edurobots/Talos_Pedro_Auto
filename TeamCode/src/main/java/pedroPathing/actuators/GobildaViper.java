@@ -4,6 +4,7 @@ package pedroPathing.actuators;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -34,9 +35,9 @@ public class GobildaViper {
     static double viperTicksToMm(int ticks) {
         return (ticks / VIPER_TICKS_PER_MM);
     }
-    void init(String name, HardwareMap hwmap) {
+    void init(String name, HardwareMap hwmap, DcMotor.Direction direction) {
         viper = hwmap.get(DcMotor.class, name); //the arm motor
-        viper.setDirection(DcMotor.Direction.REVERSE);
+        viper.setDirection(direction);
         viper.setTargetPosition(0);
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -45,12 +46,12 @@ public class GobildaViper {
     }
 
     public GobildaViper(String name, HardwareMap hwmap) {
-        init(name, hwmap);
+        init(name, hwmap, DcMotorSimple.Direction.FORWARD);
     }
-    public GobildaViper(String name, HardwareMap hwmap, boolean hardware) {
+    public GobildaViper(String name, HardwareMap hwmap, DcMotor.Direction direction, boolean hardware) {
         if (hardware) {
             hardware = true;
-            init(name, hwmap);
+            init(name, hwmap, direction);
         }
         else {
             hardware = false;
