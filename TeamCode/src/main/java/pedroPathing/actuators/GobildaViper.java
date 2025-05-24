@@ -118,7 +118,6 @@ public class GobildaViper {
     }
     public void run() {
 
-        relaxed = false;
         viper.setTargetPosition(pos);
 
         ((DcMotorEx) viper).setVelocity(3000);
@@ -126,19 +125,16 @@ public class GobildaViper {
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }
     public void relax() {
-        relaxed = true;
         viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         viper.setPower(0);
     }
     public void update() {
-        if (!hardware) {
-            return;
-        }
         if (relaxed) {
             relax();
-            return;
         }
-        run();
+        else {
+            run();
+        }
     }
 
     public boolean isRelaxed() {

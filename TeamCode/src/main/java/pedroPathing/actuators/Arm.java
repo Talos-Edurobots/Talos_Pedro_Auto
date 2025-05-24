@@ -85,7 +85,6 @@ public class Arm {
         if (!hardware) {
             return;
         }
-        relaxed = false;
         arm.setTargetPosition(pos);
         ((DcMotorEx) arm).setVelocity(2500); // 2500
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -101,14 +100,13 @@ public class Arm {
         }
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         arm.setPower(0);
-        relaxed = true;
     }
     public void update() {
-        if (hardware) {
-            run();
+        if (relaxed) {
+            relax();
         }
         else {
-            relax();
+            run();
         }
     }
     public boolean isRelaxed() {
