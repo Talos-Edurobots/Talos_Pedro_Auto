@@ -86,7 +86,7 @@ public class Arm {
             return;
         }
         arm.setTargetPosition(pos);
-        ((DcMotorEx) arm).setVelocity(2500); // 2500
+        ((DcMotorEx) arm).setVelocity(velocity); // 2500
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }

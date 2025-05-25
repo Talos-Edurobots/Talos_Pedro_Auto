@@ -3,6 +3,8 @@ package pedroPathing.examples;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -40,7 +42,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     @Override
     public void runOpMode() {
         arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
-        viper  = new GobildaViper(VIPER_CONFIGURATION, hardwareMap, hardware);
+        viper  = new GobildaViper(VIPER_CONFIGURATION, hardwareMap, DcMotor.Direction.REVERSE, hardware);
         servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
         if (hardware) {
             otos = hardwareMap.get(SparkFunOTOS.class, "otos");
