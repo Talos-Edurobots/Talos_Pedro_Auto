@@ -1,5 +1,7 @@
 package pedroPathing.actuators;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -26,7 +28,7 @@ public class Arm {
         return (int) (ticks / armTicksPerDegree);
     }
 
-    public Arm(String name, HardwareMap hwmap) {
+    public Arm(String name, @NonNull HardwareMap hwmap) {
         init(name, hwmap);
     }
 
@@ -38,7 +40,7 @@ public class Arm {
         }
     }
 
-    public void init(String name, HardwareMap hwmap) {
+    public void init(String name, @NonNull HardwareMap hwmap) {
         arm = hwmap.get(DcMotor.class, name); //the arm motor
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         hardware = true;
