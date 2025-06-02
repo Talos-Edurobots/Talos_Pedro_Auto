@@ -1,4 +1,4 @@
-package pedroPathing.examples;
+package pedroPathing.programs;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -13,12 +13,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
+import pedroPathing.PPConstants.FConstants;
+import pedroPathing.PPConstants.LConstants;
 import pedroPathing.actuators.Arm;
 import pedroPathing.actuators.Servos;
 import pedroPathing.actuators.GobildaViper;
@@ -489,8 +488,8 @@ public class TalosBasketAutonomous extends OpMode {
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
         servos.intakeCollect();
-        servos.wristHorizontal();
-        viper.calibrateViper();
+        servos.wristFolded();
+        viper.calibrate();
         buildPaths();
     }
 

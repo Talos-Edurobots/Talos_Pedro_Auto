@@ -11,7 +11,7 @@ public class Actuators {
         viper = new GobildaViper(viperName, hwmap);
         servos = new Servos(intakeName, wristName, hwmap);
     }
-    public void correctActuators() {
-
+    public void init() {
+        viper.calibrate();
     }
 }

@@ -37,16 +37,16 @@ public class Servos {
             intakePos = 1;
         }
     }
-    public void wristVertical() {
-        if (hardware) {
-            wrist.setPosition(.6);
-            wristPos = .6;
-        }
-    }
-    public void wristHorizontal() {
+    public void wristGrabSample() {
         if (hardware) {
             wrist.setPosition(0);
             wristPos = 0;
+        }
+    }
+    public void wristFolded() {
+        if (hardware) {
+            wrist.setPosition(.7);
+            wristPos = .7;
         }
     }
     public void setIntakePosition(double pos) {

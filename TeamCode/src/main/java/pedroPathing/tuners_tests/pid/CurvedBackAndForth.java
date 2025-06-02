@@ -13,8 +13,8 @@ import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.Point;
 
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
+import pedroPathing.PPConstants.FConstants;
+import pedroPathing.PPConstants.LConstants;
 
 /**
  * This is the CurvedBackAndForth autonomous OpMode. It runs the robot in a specified distance

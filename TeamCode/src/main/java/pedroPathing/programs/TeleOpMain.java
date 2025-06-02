@@ -1,4 +1,4 @@
-package pedroPathing.examples;
+package pedroPathing.programs;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -35,9 +35,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 
 
-@TeleOp(name="TeleOp back specimen score (heavy)", group="Robot")
+@TeleOp(name="TeleOp stable", group="Robot")
 //@Disabled
-public class TeleOpBackSpecimenScore extends LinearOpMode {
+public class TeleOpMain extends LinearOpMode {
     /* Declare OpMode members. */
     public DcMotor      leftFrontDrive; //the left front drivetrain motor
     public DcMotor      rightFrontDrive; //the right front drivetrain motor
@@ -346,6 +346,7 @@ public class TeleOpBackSpecimenScore extends LinearOpMode {
     }
 
     public void output(){
+        telemetry.addData("Motor Current:",((DcMotorEx) leftBackDrive).getCurrent(CurrentUnit.AMPS));
         /* send telemetry to the driver of the arm's current position and target position */
         telemetry.addLine("Version: Android 5 orfanak");
         telemetry.addData("armMotor Current:",((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
@@ -429,11 +430,12 @@ public class TeleOpBackSpecimenScore extends LinearOpMode {
         armPosition = armDegreesToTicks(10);
     }
     public void armScoreSpecimen() {
-        wrist.setPosition(1);
-        armPosition = armDegreesToTicks(170); // 165
+        wrist.setPosition(0);
+        armPosition = armDegreesToTicks(85); // 165
     }
     public void armScoreSampleInHigh() {
-        armPosition = armDegreesToTicks(110);
+        armPosition = armDegreesToTicks(110); // 110
+        wrist.setPosition(0);
     } // 90
     public void armAttachHangingHook() {
         armPosition = armDegreesToTicks(120);
@@ -468,7 +470,7 @@ public class TeleOpBackSpecimenScore extends LinearOpMode {
     }
 
     public void runArm() {
-        ((DcMotorEx) armMotor).setVelocity(500); // 2500
+        ((DcMotorEx) armMotor).setVelocity(2500); // 2500
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }
 
@@ -550,7 +552,7 @@ public class TeleOpBackSpecimenScore extends LinearOpMode {
         runViper();
     }
     public void runViper() {
-        ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide
+        ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide in ticks/s
         viperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 

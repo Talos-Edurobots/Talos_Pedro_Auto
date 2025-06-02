@@ -10,10 +10,11 @@ import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
+import pedroPathing.PPConstants.FConstants;
+import pedroPathing.PPConstants.LConstants;
 
 /**
  * This is an example auto that showcases movement and control of two servos autonomously.
@@ -27,6 +28,7 @@ import pedroPathing.constants.LConstants;
 
 
 @Autonomous(name = "Example Auto Blue", group = "Examples")
+@Disabled
 public class ExampleBucketAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;

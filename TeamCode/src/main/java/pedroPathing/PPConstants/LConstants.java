@@ -1,6 +1,5 @@
-package pedroPathing.constants;
+package pedroPathing.PPConstants;
 
-import com.pedropathing.localization.*;
 import com.pedropathing.localization.constants.*;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 

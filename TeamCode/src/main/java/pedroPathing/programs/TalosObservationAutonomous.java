@@ -1,4 +1,4 @@
-package pedroPathing.examples;
+package pedroPathing.programs;
 
 import com.pedropathing.pathgen.BezierCurve;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -21,8 +21,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
+import pedroPathing.PPConstants.FConstants;
+import pedroPathing.PPConstants.LConstants;
 
 /** This is the program for the autonomous period on the Observation Zone for this year.
  * We start at the red side of the field, and we score the preloaded specimen
@@ -346,10 +346,10 @@ public class TalosObservationAutonomous extends OpMode {
         telemetry.addData("Status", "after_init");
         telemetry.update();
         servos.intakeCollect();
-        servos.wristHorizontal();
+        servos.wristFolded();
         arm.setPositionDegrees(10);
         arm.run();
-        viper.calibrateViper();
+        viper.calibrate();
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();

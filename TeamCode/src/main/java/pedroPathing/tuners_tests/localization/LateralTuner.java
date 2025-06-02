@@ -12,8 +12,8 @@ import com.pedropathing.localization.PoseUpdater;
 import com.pedropathing.util.DashboardPoseTracker;
 import com.pedropathing.util.Drawing;
 
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
+import pedroPathing.PPConstants.FConstants;
+import pedroPathing.PPConstants.LConstants;
 
 /**
  * This is the LateralTuner OpMode. This tracks the strafe movement of the robot and displays the

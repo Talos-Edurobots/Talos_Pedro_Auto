@@ -1,5 +1,8 @@
-package pedroPathing.examples;
+package pedroPathing.programs;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.util.Constants;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,7 +17,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-import android.util.Log;
+import pedroPathing.PPConstants.FConstants;
+import pedroPathing.PPConstants.LConstants;
 
 /*
  * This is (mostly) the OpMode used in the goBILDA Robot in 3 Days for the 24-25 Into The Deep FTC Season.
@@ -32,36 +36,33 @@ import android.util.Log;
  * The drivetrain is set up as "field centric" with the internal control hub IMU. This means
  * when you push the stick forward, regardless of robot orientation, the robot drives away from you.
  * We "took inspiration" (copy-pasted) the drive code from this GM0 page
+ *
+ *
  */
 
-// 589345
-@TeleOp(name = "TeleOpMain", group = "Robot")
-//@Disabled
-public class TeleOpMain extends LinearOpMode {
 
+@TeleOp(name="TeleOp v2", group="Robot")
+//@Disabled
+public class TeleOpV2 extends LinearOpMode {
     /* Declare OpMode members. */
-    public DcMotor leftFrontDrive; //the left front drivetrain motor
-    public DcMotor rightFrontDrive; //the right front drivetrain motor
-    public DcMotor leftBackDrive; //the left back drivetrain motor
-    public DcMotor rightBackDrive; //the right back drivetrain motor
-    public DcMotor armMotor; //the arm motor
-    public DcMotor viperMotor; // the viper slide motor
-    public Servo intake; //the active intake servo
-    public Servo wrist; //the wrist servo
+    private Follower follower;
+    private final Pose startPose = new Pose(0,0,0);
+    public DcMotor      armMotor; //the arm motor
+    public DcMotor      viperMotor; // the viper slide motor
+    public Servo        intake; //the active intake servo
+    public Servo        wrist; //the wrist servo
+
 
     public SparkFunOTOS otos; // the optical odometry sensor
 
     /* Variables that are used to set the arm and viper to a specific position */
     int armPosition;
-    int armTargetPosition;
     int armPositionFudgeFactor;
 
     // these constants store the minimum and maximum values for the viper motor after initialization
     final int MAX_VIPER_POSITION = viperMotorMmToTicks(480); // max viper extension (48 cm)
-    final int MIN_VIPER_POSITION = viperMotorMmToTicks(0); // min viper extension (0 cm)
-    final int VIPER_EXPANSION_RATE = 2800;
+    final int MIN_VIPER_POSITION = 60; // min viper extension (60 ticks)
     int viperPosition; // store the current position of the viper motor in ticks
-    int viperTargetPosition;
     int viperPositionDelta;
     int armLiftComp = 0; // store the compensation factor for the arm lift
     IMU imu; // the IMU sensor object
@@ -74,13 +75,15 @@ public class TeleOpMain extends LinearOpMode {
     //odometry sensor
     SparkFunOTOS.Pose2D pos;
     // strafer speed compensation factor
-    double straferSpeedFactor = 1.5;
-    int viperCalibrationAmount = 60;
+    double strafingSpeed = .5; // strafing speed multiplier
+    double minStrafingSpeed = 0.1; // minimum strafing speed
+    double maxStrafingSpeed = 1.0; // maximum strafing speed
+
     int minArmPos = 0;
     private static final double TICKS_PER_ARM_DEGREE = 28 // number of encoder ticks per rotation of the bare motor
             * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
             * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
-            * 1 / 360.0; // we want ticks per degree, not per rotation
+            * 1/360.0; // we want ticks per degree, not per rotation
     private static final double TICKS_PER_VIPER_MM = (537.7 * 5.8) // total ticks
             / 696; // viper slide unfolded length
     private static final double ARM_HEIGHT = 330;
@@ -91,6 +94,7 @@ public class TeleOpMain extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        Constants.setConstants(FConstants .class, LConstants .class);
 
         // hardware initialization e.g. motors and sensors
         initializeIO();
@@ -98,34 +102,27 @@ public class TeleOpMain extends LinearOpMode {
         configureOtos();
         // Retrieve the IMU from the hardware map. Gyroscope initialization
         initializeIMU();
-        calibrateViper();
+        calibrateViper.start();
+
+        follower = new Follower(hardwareMap);
+        follower.setStartingPose(startPose);
 
         /* Having finished initialization process. the program
         waits for the game driver to press play button in driver station console*/
         waitForStart();
 
+        follower.startTeleopDrive();
+
         /* Runs continuously until the driver presses stop in driver station */
-        while (opModeIsActive()) {
-//            if (gamepad2.left_stick_y <= -.25){
-//                viperPosition += (int) (2800 * cycleTime);
-//            }
-//            else if (gamepad2.left_stick_y >= .25){
-//                viperPosition -= (int) (2800 * cycleTime);
-//            }
-            if (gamepad2.left_stick_y <= -.25) {
-                viperTargetPosition += (int) (VIPER_EXPANSION_RATE * cycleTime);
-            } else if (gamepad2.left_stick_y >= .25) {
-                viperTargetPosition -= (int) (VIPER_EXPANSION_RATE * cycleTime);
-            }
-            setMinArmPos();
-            calibrateViper();
-            // driving in filed centric strafer mode
-            straferMovement();
+        while (opModeIsActive())
+        {
             // compensation factor in arm motor position
 //            setMinArmPos();
 
             // reading current position of the optical odometry sensor
             pos = otos.getPosition();
+
+            strafe();
 
 
             /* Gamepad 1 controls the robot's movement (strafing mode) and the positioning of the arm
@@ -139,33 +136,39 @@ public class TeleOpMain extends LinearOpMode {
             // wrist servo moves wrist to either horizontal or vertical position
             if (gamepad2.dpad_down) {
                 wristVertical();
-            } else if (gamepad2.dpad_up) {
+            }
+            else if (gamepad2.dpad_up){
                 // wrist horizontal
                 wristHorizontal();
             }
 
             //Controlling arm positioning using buttons
-            if (gamepad2.a) { // ps4: X
+            if(gamepad2.a){ // ps4: X
                 /* This is the intake/ collecting arm position for collecting samples */
                 armCollect();
-            } else if (gamepad2.b) { // ps4: O
+            }
+            else if (gamepad2.b) { // ps4: O
                 /*
                  * This is the correct height to collect samples from the observation zone
                  */
                 armClearBarrier();
-            } else if (gamepad2.y) { //ps4 triangle
+            }
+            else if (gamepad2.y){ //ps4 triangle
                 /* This is the correct height to score the sample in the HIGH BASKET */
                 armScoreSampleInHigh();
-            } else if (gamepad2.x) { //ps4 square
+            }
+            else if (gamepad2.x) { //ps4 square
                 /* moves the arm to an angle position for scoring specimens */
                 armScoreSpecimen();
-            } else if (gamepad2.dpad_left) {
+            }
+            else if (gamepad2.dpad_left) {
                 /* This is the starting configuration of the robot. This turns off and opens fully the intake,and moves the arm
                 back to folded inside the robot. */
                 armCollapsed();
                 wristHorizontal();
                 intakeOpen();
-            } else if (gamepad2.dpad_right) {
+            }
+            else if (gamepad2.dpad_right){
                 /* This is the correct height to score SPECIMEN on the HIGH CHAMBER */
                 armScoreSampleInLow();
                 wristHorizontal();
@@ -173,7 +176,8 @@ public class TeleOpMain extends LinearOpMode {
 
             if (gamepad2.right_bumper || gamepad2.left_bumper) {
                 intakeOpen();
-            } else {
+            }
+            else {
                 intakeCollect();
             }
             /* Here we set the lift position based on the driver input.
@@ -194,14 +198,19 @@ public class TeleOpMain extends LinearOpMode {
             that our lift can move 2800mm in one cycle, but since each cycle is only a fraction of a second,
             we are only incrementing it a small amount each cycle.
              */
-
+            if (gamepad2.left_stick_y <= -.25){
+                viperPosition += (int) (2800 * cycleTime);
+            }
+            else if (gamepad2.left_stick_y >= .25){
+                viperPosition -= (int) (2800 * cycleTime);
+            }
 
             // Attention!! press these buttons ONLY if the viper motor has got stalled!
             //This will set current position as starting position for the viper and will
             // prevent the stall of the motor and its overheating
             // gamepad1 viper calibration position
             if (gamepad1.dpad_left || gamepad1.dpad_right) {
-                calibrateViper();
+                calibrateViper.start();
             }
 
             /*
@@ -217,18 +226,21 @@ public class TeleOpMain extends LinearOpMode {
             // Controlling strafing robot movement
             // controlling arm positions for hanging the robot
 
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpad_up){
                 /* This sets the arm to vertical to hook onto the LOW RUNG for hanging */
                 armAttachHangingHook();
                 // wristVertical();
-            } else if (gamepad1.dpad_down) {
+            }
+
+            else if (gamepad1.dpad_down){
                 /* this moves the arm down to lift the robot up once it has been hooked */
                 armWinchRobot();
                 //wristVertical();
             }
             if (gamepad1.a) {
                 wrist.setPosition(0);
-            } else if (gamepad1.b) {
+            }
+            else if (gamepad1.b) {
                 wrist.setPosition(1);
             }
 
@@ -236,6 +248,8 @@ public class TeleOpMain extends LinearOpMode {
             configureFudge();
             setArmTargetPosition();
             runArm();
+
+
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
             if (((DcMotorEx) armMotor).isOverCurrent()) {
@@ -271,13 +285,8 @@ public class TeleOpMain extends LinearOpMode {
     //    ---------------- | initialization, output | ---------------------------------------------------------------------------------------------------------------------------------------------
     public void initializeIO() {
         /* Define and Initialize Motors */
-        leftFrontDrive  = hardwareMap.dcMotor.get("left_front");
-        leftBackDrive   = hardwareMap.dcMotor.get("left_back");
-        rightFrontDrive = hardwareMap.dcMotor.get("right_front");
-        rightBackDrive  = hardwareMap.dcMotor.get("right_back");
         viperMotor      = hardwareMap.dcMotor.get("viper_motor"); // linear viper slide motor
         armMotor        = hardwareMap.get(DcMotor.class, "dc_arm"); //the arm motor
-
 
         // define the optical odometry sensor object
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
@@ -286,25 +295,19 @@ public class TeleOpMain extends LinearOpMode {
        we need to reverse the left side of the drivetrain so it doesn't turn when we ask all the
        drive motors to go forward.
         */
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
 
         /* Setting zeroPowerBehavior to BRAKE enables a "brake mode". This causes the motor to slow down
         much faster when it is coasting. This creates a much more controllable drivetrain. As the robot
         stops much quicker. */
-        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         viperMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
         /*This sets the maximum current that the control hub will apply to the arm before throwing a flag */
-        ((DcMotorEx) armMotor).setCurrentAlert(5, CurrentUnit.AMPS);
+        ((DcMotorEx) armMotor).setCurrentAlert(5,CurrentUnit.AMPS);
 
         /*This sets the maximum current that the control hub will apply to the viper motor before throwing a flag */
-        ((DcMotorEx) viperMotor).setCurrentAlert(5, CurrentUnit.AMPS);
+        ((DcMotorEx) viperMotor).setCurrentAlert(5,CurrentUnit.AMPS);
 
         /* Before starting the arm and viper motors. We'll make sure the TargetPosition is set to 0.
         Then we'll set the RunMode to RUN_TO_POSITION. And we'll ask it to stop and reset encoder.
@@ -323,7 +326,7 @@ public class TeleOpMain extends LinearOpMode {
 
         /* Define and initialize servos.*/
         intake = hardwareMap.get(Servo.class, "intake_servo");
-        wrist = hardwareMap.get(Servo.class, "wrist_servo");
+        wrist  = hardwareMap.get(Servo.class, "wrist_servo");
 
         /* Starting position with the wrist horizontal and intake open*/
         wristHorizontal();
@@ -345,17 +348,18 @@ public class TeleOpMain extends LinearOpMode {
         imu.initialize(parameters);
     }
 
-    public void output() {
+    public void output(){
         /* send telemetry to the driver of the arm's current position and target position */
         telemetry.addLine("Version: Android 5 orfanak");
-        telemetry.addData("armMotor Current:", ((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
-        telemetry.addData("viperMotor Current:", ((DcMotorEx) viperMotor).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("armMotor Current:",((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("viperMotor Current:",((DcMotorEx) viperMotor).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("arm target Position: ", armMotor.getTargetPosition());
         telemetry.addData("arm current position: ", armMotor.getCurrentPosition());
+        telemetry.addData("arm min position: ", minArmPos);
         //telemetry.addData("viper busy", viperMotor.isBusy());
         telemetry.addData("viper target Position", viperMotor.getTargetPosition());
         telemetry.addData("viper current position", viperMotor.getCurrentPosition());
-        telemetry.addData("cycle time sec", cycleTime);
+        telemetry.addData("cycle time sec",cycleTime);
         telemetry.addData("wrist pos", wrist.getPosition());
         telemetry.addData("intake pos", intake.getPosition());
         telemetry.addData("X coordinate", pos.x);
@@ -365,19 +369,20 @@ public class TeleOpMain extends LinearOpMode {
     }
 
     // ---------------- | arm position handling| ----------------------------------------------------------------------------------------------------------------------------------
+
+
     public int armDegreesToTicks(double degrees) {
         /* this function converts degrees to ticks for the arm motor */
         return (int) (
                 28 // number of encoder ticks per rotation of the bare motor
                         * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
                         * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
-                        * 1 / 360.0 // we want ticks per degree, not per rotation
+                        * 1/360.0 // we want ticks per degree, not per rotation
                         * degrees // the specified degrees
         );
 
     }
-
-    public void setMinArmPos() {
+    public void setMinArmPos(){
             /*
             This is probably my favorite piece of code on this robot. It's a clever little software
             solution to a problem the robot has.
@@ -405,16 +410,13 @@ public class TeleOpMain extends LinearOpMode {
 //        telemetry.addData("arm position", armPosition);
         armLiftComp = 0;
     }
-
     public void setArmPosition(int degrees) {
         armPosition = degrees;
     }
-
     public void armCollapsed() {
         wrist.setPosition(0);
         armPosition = 0;
     }
-
     public void armClearBarrier() {
         wrist.setPosition(0);
             /* This is about 20° up from the collecting position to clear the barrier
@@ -425,20 +427,18 @@ public class TeleOpMain extends LinearOpMode {
     }
 
     // these are functions for arm movement
-    public void armCollect() {
+    public void armCollect(){
         wrist.setPosition(0);
         armPosition = armDegreesToTicks(10);
     }
-
     public void armScoreSpecimen() {
         wrist.setPosition(0);
         armPosition = armDegreesToTicks(85); // 165
     }
-
     public void armScoreSampleInHigh() {
-        armPosition = armDegreesToTicks(110);
+        armPosition = armDegreesToTicks(110); // 110
+        wrist.setPosition(0);
     } // 90
-
     public void armAttachHangingHook() {
         armPosition = armDegreesToTicks(120);
     }
@@ -446,11 +446,9 @@ public class TeleOpMain extends LinearOpMode {
     public void armScoreSampleInLow() {
         armPosition = armDegreesToTicks(105);
     }
-
     public void armWinchRobot() {
         armPosition = armDegreesToTicks(0);
     }
-
     public void configureFudge() {
             /* Here we create a "fudge factor" for the arm position.
             This allows you to adjust (or "fudge") the arm position slightly with the gamepad triggers.
@@ -464,7 +462,6 @@ public class TeleOpMain extends LinearOpMode {
                         (armDegreesToTicks(15) * (-gamepad2.left_trigger))
         );
     }
-
     public void setArmTargetPosition() {
            /* Here we set the target position of our arm to match the variable that was selected
             by the driver. We add the armPosition Variable to our armPositionFudgeFactor, before adding
@@ -485,23 +482,20 @@ public class TeleOpMain extends LinearOpMode {
         intake.setPosition(0); // intake open
         intakeOpened = true;
     }
-
     public void intakeCollect() {
         intake.setPosition(1);
     }
-
     public void wristVertical() {
         wrist.setPosition(0.60); // 0.6
         wristVertical = true;
     }
-
     public void wristHorizontal() {
         wrist.setPosition(0);
         wristVertical = false;
     }
 
     //    ---------------- | viper slide | -------------------------------------------------------------
-    public int viperMotorMmToTicks(double mm) {
+    public int viperMotorMmToTicks(int mm) {
         /*
          * 312 rpm motor: 537.7 ticks per revolution
          * 4 stage viper slide (240mm): 5,8 rotations to fully expand
@@ -518,24 +512,20 @@ public class TeleOpMain extends LinearOpMode {
                         ) // viper slide unfolded length
                                 * mm // specified length
 
-                ) + viperCalibrationAmount; //we add 100mm at the end because our viper is not able to completely fold inside (i.e. go to 0mm) while the viper motor continues to try
-        // to achieve its target 0mm positionn. This has the result the motor to heat up and get stalled and get destroyed. However the viper motor always achieves the target for
-        //100mm position and thus doesn't get streesed.
+                );
     }
-
     public void setViperPosition(int mm) {
         viperPosition = viperMotorMmToTicks(mm);
     }
-
     public void viperCollapsed() {
-        viperPosition = viperMotorMmToTicks(0);
+        viperPosition = MIN_VIPER_POSITION;
     }
 
     public void viperNormalization() {
         /*here we check to see if the lift is trying to go higher than the maximum extension.
            if it is, we set the variable to the max. */
 
-        if (viperPosition > MAX_VIPER_POSITION) {
+        if (viperPosition > MAX_VIPER_POSITION){
             viperPosition = MAX_VIPER_POSITION;
         }
         // same as above, we see if the lift is trying to go below the minimum limit, and if it is, we set it to 0.
@@ -544,111 +534,43 @@ public class TeleOpMain extends LinearOpMode {
         }
 
     }
-
     public void setViperTargetPosition() {
-        viperMotor.setTargetPosition(viperPosition + viperCalibrationAmount);
+        viperMotor.setTargetPosition(viperPosition);
     }
-
-    public void calibrateViper() {
-        /*
-         * This is a solution to a problem that our robot had. Sometimes during gameplay the belt of
-         * the viper slide didn't made contact with the gear and consequently the belt skipped some
-         * teeth in the gear. This means that when the viper slide motor runs to position that the
-         * viper slide is collapsed, the viper slide motor will stall. This piece of code runs the motor
-         * in order to get stalled for 1 second. Then I reset the motor and I set the current position to 0
-         */
-        viperMotor.setTargetPosition(viperMotorMmToTicks(-500));
-        runViper();
-        sleep(1000);
-        viperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        viperPosition = 0;
-        setViperTargetPosition();
-        runViper();
-    }
-
+    public Thread calibrateViper = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            /*
+             * This is a thread that runs when the gamepad1 dpad_left or dpad_right is pressed.
+             * It sets the viper motor to a position that is 500mm below the current position.
+             * Then it runs the viper motor for 1 second, and resets the encoder.
+             * This is used to calibrate the viper motor in case it gets stalled during gameplay.
+             */
+            viperMotor.setTargetPosition(viperMotorMmToTicks(-500));
+            runViper();
+            sleep(1000);
+            viperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            viperPosition = 0;
+            setViperTargetPosition();
+            runViper();
+        }
+    });
     public void runViper() {
-        ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide
+        ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide in ticks/s
         viperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public double minArmLiftAmountDegrees(int viperPositionMm) {
-        return Math.toDegrees(Math.acos(Math.toRadians((VIPER_COLLAPSED_LENGTH + viperPositionMm) / ARM_HEIGHT)) + ARM_MIN_DEG);
-    }
-
-    public double maxViperExpansionAmount(double armDegrees) {
-        return Math.toDegrees(Math.cos(Math.toRadians(ARM_MIN_DEG + armDegrees))) * ARM_HEIGHT;
-    }
-
-    public void normalizeActuators() {
-        /*
-         * This function corrects the viper and arm positions
-         * - handles viper min and max positions
-         * - adds a arm lift amount when the viper is expanding
-         * - sets the order that the arm and the viper move
-         */
-
-        /*
-         * here we check to see if the lift is trying to go higher than the maximum extension.
-         * if it is, we set the variable to the max.
-         */
-
-        if (viperPosition > MAX_VIPER_POSITION) {
-            viperPosition = MAX_VIPER_POSITION;
-        }
-        // same as above, we see if the lift is trying to go below the minimum limit, and if it is, we set it to 0.
-        if (viperPosition < MIN_VIPER_POSITION) {
-            viperPosition = MIN_VIPER_POSITION;
-        }
-
-        // if the viper is expanding, we add a arm lift amount to the arm position
-        if (viperTargetPosition > viperPosition) {
-            viperPosition = viperTargetPosition;
-            minArmPos = armDegreesToTicks(minArmLiftAmountDegrees(viperPosition));
-        } else if (viperTargetPosition < viperPosition) {
-            minArmPos = armDegreesToTicks(maxViperExpansionAmount(armTargetPosition));
-            viperPosition = viperMotorMmToTicks(maxViperExpansionAmount(armPosition));
-        }
-    }
-
     //    ---------------- | strafer movement| --------------------------------------------------
-    public void straferMovement() {
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
 
-        // This button choice was made so that it is hard to hit on accident,
-        // it can be freely changed based on preference.
-        // The equivalent button is "start" on Xbox-style controllers.
-        // press options button to reset IMU
-        if (gamepad1.options) {
-            imu.resetYaw();
-        }
-
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-        // Rotate the movement direction counter to the bot's rotation
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-        rotX *= 1.1;  // Counteract imperfect strafing
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        // we multiply denominator variable by a variable named "straferSpeedFactor" with a value greater than 1
-        // in order to reduce the strafing speed. The normal strafing speed is to high and thus difficult to control the robot
-        double denominator = straferSpeedFactor * Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
-
-        leftFrontDrive.setPower(frontLeftPower);
-        leftBackDrive.setPower(backLeftPower);
-        rightFrontDrive.setPower(frontRightPower);
-        rightBackDrive.setPower(backRightPower);
+    public void strafe() {
+        double x = -gamepad1.left_stick_y; // forward/backward movement
+        double y = gamepad1.left_stick_x; // left/right movement
+        double rot = -gamepad1.right_stick_x; // turning movement
+        double acc = gamepad1.left_trigger; // acceleration factor
+        double de = gamepad1.right_trigger; // deceleration factor
+        double mult = strafingSpeed + acc*(maxStrafingSpeed - strafingSpeed) - de*(strafingSpeed - minStrafingSpeed); // strafing speed multiplier
+        follower.setTeleOpMovementVectors(x*mult, y*mult, rot*mult, false);
     }
-
     public void configureOtos() {
         telemetry.addLine("Configuring OTOS...");
         telemetry.update();
@@ -674,7 +596,7 @@ public class TeleOpMain extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.9, 0, -90);
         otos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for
@@ -733,4 +655,3 @@ public class TeleOpMain extends LinearOpMode {
         telemetry.update();
     }
 }
-

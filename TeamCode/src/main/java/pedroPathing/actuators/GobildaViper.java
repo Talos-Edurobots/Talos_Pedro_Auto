@@ -18,8 +18,8 @@ public class GobildaViper {
 //    public Telemetry tel;
     private OpMode opMode;
     private int pos; // in ticks
-    private int viperCalibrationAmount = 100;
-    private static double VIPER_TICKS_PER_MM = (
+    private final int CALIBRATION_AMOUNT = 100;
+    private static double TICKS_PER_MM = (
             (
                     (
                             537.7 * 5.8
@@ -29,11 +29,11 @@ public class GobildaViper {
     );
     // to achieve its target 0mm positionn. This has the result the motor to heat up and get stalled and get destroyed. However the viper motor always achieves the target for
     //100mm position and thus doesn't get streesed.
-    static int viperMmToTicks(double mm) {
-        return (int) (mm * VIPER_TICKS_PER_MM);
+    static int mmToTicks(double mm) {
+        return (int) (mm * TICKS_PER_MM);
     }
-    static double viperTicksToMm(int ticks) {
-        return (ticks / VIPER_TICKS_PER_MM);
+    static double ticksToMm(int ticks) {
+        return (ticks / TICKS_PER_MM);
     }
     void init(String name, HardwareMap hwmap, DcMotor.Direction direction) {
         viper = hwmap.get(DcMotor.class, name); //the arm motor
@@ -58,14 +58,14 @@ public class GobildaViper {
         }
     }
     public void setPositionMm(double position) {
-        pos = viperMmToTicks(position);
+        pos = mmToTicks(position);
     }
     public void setPositionTicks(int pos) {
         this.pos = pos;
     }
     public double getCurrentPositionMm() {
         if (hardware) {
-            return viperTicksToMm(viper.getCurrentPosition());
+            return ticksToMm(viper.getCurrentPosition());
         }
         else {
             return getTargetPositionMm();
@@ -80,12 +80,12 @@ public class GobildaViper {
         }
     }
     public double getTargetPositionMm() {
-        return viperTicksToMm(pos);
+        return ticksToMm(pos);
     }
     public int getTargetPositionTicks() {
         return pos;
     }
-    public void calibrateViper() {
+    public void calibrate() {
         /*
          * This is a solution to a problem that our robot had. Sometimes during gameplay the belt of
          * the viper slide didn't made contact with the gear and consequently the belt skipped some
@@ -98,7 +98,7 @@ public class GobildaViper {
             @Override
             public void run() {
                 timer.reset();
-                viper.setTargetPosition(viperMmToTicks(-500));
+                viper.setTargetPosition(mmToTicks(-500));
                 ((DcMotorEx) viper).setVelocity(3000); //velocity of the viper slide
                 viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 double i;
@@ -111,18 +111,15 @@ public class GobildaViper {
                 }
                 while (i < 1000);
                 viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                setPositionTicks(50);
+                setPositionTicks(CALIBRATION_AMOUNT);
                 GobildaViper.this.run();
             }
         };
         thread.start();
     }
     public void run() {
-
-        viper.setTargetPosition(pos);
-
+        viper.setTargetPosition(Math.max(pos, CALIBRATION_AMOUNT));
         ((DcMotorEx) viper).setVelocity(3000);
-
         viper.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }
     public void relax() {
