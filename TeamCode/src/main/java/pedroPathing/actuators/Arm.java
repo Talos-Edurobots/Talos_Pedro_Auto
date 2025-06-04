@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class Arm {
     public DcMotor arm;
+    public DcMotor.RunMode runMode = DcMotor.RunMode.RUN_TO_POSITION;
     public boolean hardware;
     private boolean relaxed;
     //    public Telemetry tel;
@@ -87,10 +88,12 @@ public class Arm {
         if (!hardware) {
             return;
         }
-        arm.setTargetPosition(pos);
+        arm.setMode(runMode);
+        if (runMode == DcMotor.RunMode.RUN_TO_POSITION) {
+            arm.setTargetPosition(pos);
+        }
         ((DcMotorEx) arm).setVelocity(velocity); // 2500
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }
     public void setVelocity(int vel) {
         velocity = vel;
