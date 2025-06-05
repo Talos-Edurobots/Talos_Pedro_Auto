@@ -1,4 +1,4 @@
-package pedroPathing.programs;
+package pedroPathing.Testers;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -11,15 +11,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import pedroPathing.actuators.*;
 import pedroPathing.gamepad.GamepadButtonHandler;
 
-@TeleOp(name = "Actuators Tester v3", group = "Test")
-public class ActuatorsTesterV2 extends LinearOpMode {
+@TeleOp(name = "Actuators Tester v2", group = "Test")
+public class ActuatorsTester extends LinearOpMode {
     boolean hardware = true;
     final String ARM_CONFIGURATION    = "dc_arm";
     final String VIPER_CONFIGURATION  = "viper_motor";
     final String INTAKE_CONFIGURATION = "intake_servo";
     final String WRIST_CONFIGURATION  = "wrist_servo";
     final String OTOS_CONFIGURATION   = "otos";
-
+    final double ARM_TICKS_PER_DEGREE = (28 // number of encoder ticks per rotation of the bare motor
+            * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
+            * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
+            * 1/360.0);
 
     SparkFunOTOS otos;
     SparkFunOTOS.Pose2D otosPos;
@@ -28,17 +31,11 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     GobildaViper viper;
     Servos servos;
     int viperPosition = 0;
-    int armPosition = 0;
+    double armPosition = 0;
     boolean ArmSetPositionMode = true; // true: sets position, false: gets position
     boolean ViperSetPositionMode = true; // true: sets position, false: gets position
     boolean showInTicks = false; // true: show ticks, false: show degrees/mm
     double loopTime, oldTime, cycleTime;
-    final double DEFAULT_SCALAR = .5;
-    final double LOWER_SCALAR = .1;
-    final double HIGHER_SCALAR = 1;
-    final int MAX_VIPER_SPEED = GobildaViper.mmToTicks(10);
-    final int MAX_ARM_SPEED = Arm.degreesToTicks(30);
-
     GamepadButtonHandler myGamepad = new GamepadButtonHandler();
 
     @Override
@@ -47,7 +44,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
         viper  = new GobildaViper(VIPER_CONFIGURATION, hardwareMap, DcMotor.Direction.REVERSE, hardware);
         servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
         if (hardware) {
-            otos = hardwareMap.get(SparkFunOTOS.class, OTOS_CONFIGURATION);
+            otos = hardwareMap.get(SparkFunOTOS.class, "otos");
             configureOtos();
         }
         servos.intakeCollect();
@@ -65,34 +62,57 @@ public class ActuatorsTesterV2 extends LinearOpMode {
             if (hardware) {
                 otosPos = otos.getPosition();
             }
-            double scalar = (
-                    DEFAULT_SCALAR
-                        - gamepad1.left_trigger*(DEFAULT_SCALAR-LOWER_SCALAR)
-                        + gamepad1.right_trigger*(HIGHER_SCALAR-DEFAULT_SCALAR)
-                );
 
             switch (currentActuator) {
                 case ARM:
-                    armPosition = (int) (MAX_ARM_SPEED * scalar * (-gamepad1.left_stick_y));
+                    armPosition -= (gamepad1.left_stick_y * 1000 * cycleTime);
+                    armPosition -= (gamepad1.right_stick_y * 100 * cycleTime);
+                    if (armPosition < 0) {
+                        armPosition = 0;
+                        gamepad1.rumbleBlips(1);
+                    }
+                    if (myGamepad.a.justPressed(gamepad1.a)) {
+                        if (arm.isRelaxed()) {
+                            armPosition = arm.getCurrentPositionTicks();
+                        }
+                        gamepad1.rumbleBlips(1);
+                        arm.changeState();
+                    }
+                    break;
                 case VIPER:
-                    viperPosition = ((int) (MAX_VIPER_SPEED * scalar * (-gamepad1.left_stick_y)));
+                    viperPosition -= (int) (gamepad1.left_stick_y * 1000 * cycleTime);
+                    viperPosition -= (int) (gamepad1.right_stick_y * 100 * cycleTime);
+                    if (viperPosition < 0) {
+                        viperPosition = 0;
+                        gamepad1.rumbleBlips(1);
+                    }
+                    if (myGamepad.a.justPressed(gamepad1.a)) {
+                        if (viper.isRelaxed()) {
+                            viperPosition = viper.getCurrentPositionTicks();
+                        }
+                        viper.changeState();
+                        gamepad1.rumbleBlips(1);
+                    }
                     break;
                 case INTAKE:
-                    servos.setIntakePosition(servos.getIntakePosition() + gamepad1.left_stick_y * cycleTime * scalar);
+                    servos.setIntakePosition(servos.getIntakePosition() + gamepad1.left_stick_y * cycleTime);
+                    servos.setIntakePosition(servos.getIntakePosition() + gamepad1.right_stick_y * cycleTime * .1f);
                     break;
                 case WRIST:
-                    servos.setWristPosition(servos.getWristPosition() + gamepad1.left_stick_y * cycleTime * scalar);
+                    servos.setWristPosition(servos.getWristPosition() + gamepad1.left_stick_y * cycleTime);
+                    servos.setWristPosition(servos.getWristPosition() + gamepad1.right_stick_y * cycleTime * .1f);
                     break;
             }
 
-            arm.setPositionTicks(armPosition);
+            arm.setPositionTicks((int) armPosition);
             viper.setPositionTicks(viperPosition);
+
             arm.update();
             viper.update();
-            if (myGamepad.left_bumper.justPressed(gamepad1.left_bumper)) {
+            if (myGamepad.dpad_up.justPressed(gamepad1.dpad_up)) {
                 previousActuator();
             }
-            if (myGamepad.right_bumper.justPressed(gamepad1.right_bumper)) {
+            if (myGamepad.dpad_down.justPressed(gamepad1.dpad_down)) {
                 nextActuator();
             }
             if (myGamepad.y.justPressed(gamepad1.y)) {
@@ -127,8 +147,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
         VIPER,
         INTAKE,
         WRIST,
-        OTOS,
-        STRAFE
+        OTOS
     };
 
     void nextActuator() {
@@ -171,7 +190,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
 
         otos.resetTracking();
 
-        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 7, -90);
+        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
         otos.setPosition(currentPosition);
 
         // Get the hardware and firmware version
