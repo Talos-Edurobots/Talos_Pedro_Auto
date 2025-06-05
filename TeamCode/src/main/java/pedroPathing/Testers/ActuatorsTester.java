@@ -177,7 +177,7 @@ public class ActuatorsTester extends LinearOpMode {
 //        telemetry.update();
 
 
-        otos.setLinearUnit(DistanceUnit.CM);
+        otos.setLinearUnit(DistanceUnit.INCH);
         otos.setAngularUnit(AngleUnit.DEGREES);
 
         SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);

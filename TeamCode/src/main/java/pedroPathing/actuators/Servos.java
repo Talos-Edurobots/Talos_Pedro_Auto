@@ -45,7 +45,7 @@ public class Servos {
     }
     public void wristFolded() {
         if (hardware) {
-            wrist.setPosition(.7);
+            wrist.setPosition(1);
             wristPos = .7;
         }
     }

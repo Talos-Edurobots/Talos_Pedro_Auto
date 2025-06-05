@@ -19,7 +19,7 @@ public class GobildaViper {
     private OpMode opMode;
     private int pos; // in ticks
     private final int CALIBRATION_AMOUNT = 100;
-    private int velocity;
+    private int velocity = 3000;
     public DcMotor.RunMode runMode = DcMotor.RunMode.RUN_TO_POSITION;
     private static double TICKS_PER_MM = (
             (
@@ -120,9 +120,10 @@ public class GobildaViper {
         thread.start();
     }
     public void run() {
-        viper.setMode(runMode);
         viper.setTargetPosition(Math.max(pos, CALIBRATION_AMOUNT));
         ((DcMotorEx) viper).setVelocity(velocity);
+        viper.setMode(runMode);
+        viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     public void relax() {
         viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
