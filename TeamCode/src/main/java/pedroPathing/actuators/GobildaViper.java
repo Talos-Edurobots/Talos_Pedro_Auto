@@ -31,10 +31,10 @@ public class GobildaViper {
     );
     // to achieve its target 0mm positionn. This has the result the motor to heat up and get stalled and get destroyed. However the viper motor always achieves the target for
     //100mm position and thus doesn't get streesed.
-    static int mmToTicks(double mm) {
+    public static int mmToTicks(double mm) {
         return (int) (mm * TICKS_PER_MM);
     }
-    static double ticksToMm(int ticks) {
+    public static double ticksToMm(int ticks) {
         return (ticks / TICKS_PER_MM);
     }
     void init(String name, HardwareMap hwmap, DcMotor.Direction direction) {

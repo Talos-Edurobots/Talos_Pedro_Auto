@@ -21,11 +21,11 @@ public class Arm {
             * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
             * 1 / 360.0);
 
-    static int armDegreesToTicks(double degrees) {
+    public static int degreesToTicks(double degrees) {
         return (int) (degrees * armTicksPerDegree);
     }
 
-    static double armTicksToDegrees(int ticks) {
+    public static double ticksToDegrees(int ticks) {
         return (int) (ticks / armTicksPerDegree);
     }
 
@@ -57,12 +57,12 @@ public class Arm {
     }
 
     public void setPositionDegrees(double position) {
-        pos = armDegreesToTicks(position);
+        pos = degreesToTicks(position);
     }
 
     public double getCurrentPositionDegrees() {
         if (hardware) {
-            return armTicksToDegrees(arm.getCurrentPosition());
+            return ticksToDegrees(arm.getCurrentPosition());
         } else {
             return getTargetPositionDegrees();
         }
@@ -77,7 +77,7 @@ public class Arm {
     }
 
     public double getTargetPositionDegrees() {
-        return armTicksToDegrees(pos);
+        return ticksToDegrees(pos);
     }
 
     public int getTargetPositionTicks() {

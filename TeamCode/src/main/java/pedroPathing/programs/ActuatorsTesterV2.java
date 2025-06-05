@@ -28,7 +28,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     GobildaViper viper;
     Servos servos;
     int viperPosition = 0;
-    double armPosition = 0;
+    int armPosition = 0;
     boolean ArmSetPositionMode = true; // true: sets position, false: gets position
     boolean ViperSetPositionMode = true; // true: sets position, false: gets position
     boolean showInTicks = false; // true: show ticks, false: show degrees/mm
@@ -36,6 +36,8 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     final double DEFAULT_SCALAR = .5;
     final double LOWER_SCALAR = .1;
     final double HIGHER_SCALAR = 1;
+    final int MAX_VIPER_SPEED = GobildaViper.mmToTicks(10);
+    final int MAX_ARM_SPEED = Arm.degreesToTicks(30);
 
     GamepadButtonHandler myGamepad = new GamepadButtonHandler();
 
@@ -53,7 +55,6 @@ public class ActuatorsTesterV2 extends LinearOpMode {
 
         currentActuator = Actuators.ARM;
 
-        arm.runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         telemetry.addLine("Robot ready.");
         telemetry.update();
 
@@ -72,10 +73,9 @@ public class ActuatorsTesterV2 extends LinearOpMode {
 
             switch (currentActuator) {
                 case ARM:
-                    armPosition = (int) (3000 * scalar * gamepad1.left_stick_y *(-1));
+                    armPosition = (int) (MAX_ARM_SPEED * scalar * (-gamepad1.left_stick_y));
                 case VIPER:
-                    viperPosition = ((int) (3000 * scalar * gamepad1.left_stick_y *(-1));
-
+                    viperPosition = ((int) (MAX_VIPER_SPEED * scalar * (-gamepad1.left_stick_y)));
                     break;
                 case INTAKE:
                     servos.setIntakePosition(servos.getIntakePosition() + gamepad1.left_stick_y * cycleTime * scalar);
@@ -85,8 +85,8 @@ public class ActuatorsTesterV2 extends LinearOpMode {
                     break;
             }
 
-            arm.setTargetPositionTicks(armPosition);
-            viper.setTargetPositionTicks(viperPosition);
+            arm.setPositionTicks(armPosition);
+            viper.setPositionTicks(viperPosition);
             arm.update();
             viper.update();
             if (myGamepad.left_bumper.justPressed(gamepad1.left_bumper)) {
@@ -127,7 +127,8 @@ public class ActuatorsTesterV2 extends LinearOpMode {
         VIPER,
         INTAKE,
         WRIST,
-        OTOS
+        OTOS,
+        STRAFE
     };
 
     void nextActuator() {
