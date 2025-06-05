@@ -72,9 +72,9 @@ public class ActuatorsTesterV2 extends LinearOpMode {
 
             switch (currentActuator) {
                 case ARM:
-                    arm.setVelocity((int) (3000 * scalar * gamepad1.left_stick_y *(-1)));
+                    armPosition = (int) (3000 * scalar * gamepad1.left_stick_y *(-1));
                 case VIPER:
-                    viper.setVelocity((int) (3000 * scalar * gamepad1.left_stick_y *(-1)));
+                    viperPosition = ((int) (3000 * scalar * gamepad1.left_stick_y *(-1));
 
                     break;
                 case INTAKE:
@@ -85,6 +85,8 @@ public class ActuatorsTesterV2 extends LinearOpMode {
                     break;
             }
 
+            arm.setTargetPositionTicks(armPosition);
+            viper.setTargetPositionTicks(viperPosition);
             arm.update();
             viper.update();
             if (myGamepad.left_bumper.justPressed(gamepad1.left_bumper)) {
