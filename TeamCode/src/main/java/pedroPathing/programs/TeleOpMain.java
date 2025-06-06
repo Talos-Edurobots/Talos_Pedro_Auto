@@ -484,11 +484,11 @@ public class TeleOpMain extends LinearOpMode {
         intake.setPosition(1);
     }
     public void wristVertical() {
-        wrist.setPosition(0.60); // 0.6
+        wrist.setPosition(0); // 0.6
         wristVertical = true;
     }
     public void wristHorizontal() {
-        wrist.setPosition(0);
+        wrist.setPosition(1);
         wristVertical = false;
     }
 
