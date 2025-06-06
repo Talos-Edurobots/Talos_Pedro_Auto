@@ -427,11 +427,11 @@ public class TeleOpMain extends LinearOpMode {
     // these are functions for arm movement
     public void armCollect(){
         wrist.setPosition(0);
-        armPosition = armDegreesToTicks(10);
+        armPosition = 180;
     }
     public void armScoreSpecimen() {
         wrist.setPosition(0);
-        armPosition = armDegreesToTicks(85); // 165
+        armPosition = armDegreesToTicks(88); // 165
     }
     public void armScoreSampleInHigh() {
         armPosition = armDegreesToTicks(110); // 110
@@ -456,7 +456,7 @@ public class TeleOpMain extends LinearOpMode {
             than the other, it "wins out". This variable is then multiplied by our FUDGE_FACTOR.
             The FUDGE_FACTOR is the number of degrees that we can adjust the arm by with this function. */
         armPositionFudgeFactor = (int) (
-                (armDegreesToTicks(10) * gamepad2.right_trigger) +
+                (armDegreesToTicks(15) * gamepad2.right_trigger) +
                         (armDegreesToTicks(15) * (-gamepad2.left_trigger))
         );
     }
@@ -583,11 +583,12 @@ public class TeleOpMain extends LinearOpMode {
         // but only if at least one is out of the range [-1, 1]
         // we multiply denominator variable by a variable named "straferSpeedFactor" with a value greater than 1
         // in order to reduce the strafing speed. The normal strafing speed is to high and thus difficult to control the robot
-        double denominator = straferSpeedFactor* Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
+        double speed = .5 + .5 * (gamepad1.right_trigger) - .4 * (gamepad1.left_trigger);
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = speed*((rotY + rotX + rx) / denominator);
+        double backLeftPower = speed*((rotY - rotX + rx) / denominator);
+        double frontRightPower = speed*((rotY - rotX - rx) / denominator);
+        double backRightPower = speed*(rotY + rotX - rx) / denominator;
 
         leftFrontDrive.setPower(frontLeftPower);
         leftBackDrive.setPower(backLeftPower);

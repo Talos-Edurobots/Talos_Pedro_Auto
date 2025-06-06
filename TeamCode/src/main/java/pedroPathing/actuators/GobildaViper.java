@@ -18,7 +18,7 @@ public class GobildaViper {
 //    public Telemetry tel;
     private OpMode opMode;
     private int pos; // in ticks
-    private final int CALIBRATION_AMOUNT = 100;
+    private final int CALIBRATION_AMOUNT = 60;
     private int velocity = 3000;
     public DcMotor.RunMode runMode = DcMotor.RunMode.RUN_TO_POSITION;
     private static double TICKS_PER_MM = (

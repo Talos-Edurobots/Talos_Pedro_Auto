@@ -25,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import pedroPathing.PPConstants.FConstants;
 import pedroPathing.PPConstants.LConstants;
+import pedroPathing.PPConstants.*;
 
 /** This is the program for the autonomous period on the Observation Zone for this year.
  * We start at the red side of the field, and we score the preloaded specimen

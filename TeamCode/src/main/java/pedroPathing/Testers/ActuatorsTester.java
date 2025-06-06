@@ -67,10 +67,6 @@ public class ActuatorsTester extends LinearOpMode {
                 case ARM:
                     armPosition -= (gamepad1.left_stick_y * 1000 * cycleTime);
                     armPosition -= (gamepad1.right_stick_y * 100 * cycleTime);
-                    if (armPosition < 0) {
-                        armPosition = 0;
-                        gamepad1.rumbleBlips(1);
-                    }
                     if (myGamepad.a.justPressed(gamepad1.a)) {
                         if (arm.isRelaxed()) {
                             armPosition = arm.getCurrentPositionTicks();
