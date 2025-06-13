@@ -40,7 +40,7 @@ public class TalosObservationAutonomousReverse extends OpMode {
     Arm    arm;
     Servos servos;
     GobildaViper viper;
-    final double ARM_GRAB_SPECIMEN_DEGREES = 30.5;
+    final double ARM_GRAB_SPECIMEN_DEGREES = 22;
     final double ARM_ATTACH_TO_BAR_DEGREES = 77;
     final double ARM_SCORE_DEGREES = 60;
     // the starting pose of the robot

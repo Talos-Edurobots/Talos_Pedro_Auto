@@ -40,8 +40,8 @@ public class GobildaViper {
     void init(String name, HardwareMap hwmap, DcMotor.Direction direction) {
         viper = hwmap.get(DcMotor.class, name); //the arm motor
         viper.setDirection(direction);
-        viper.setTargetPosition(0);
-        viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        viper.setTargetPosition(0);
+//        viper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         viper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ((DcMotorEx) viper).setCurrentAlert(5, CurrentUnit.AMPS);

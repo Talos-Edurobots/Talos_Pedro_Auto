@@ -49,6 +49,12 @@ public class Servos {
             wristPos = .7;
         }
     }
+    public void wristGrabSpecimenFromWall() {
+        if (hardware) {
+            wrist.setPosition(.45);
+            wristPos = .60;
+        }
+    }
     public void setIntakePosition(double pos) {
         intakePos = pos;
         if (!hardware) {
