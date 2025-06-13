@@ -48,7 +48,7 @@ public class GobildaViper {
     }
 
     public GobildaViper(String name, HardwareMap hwmap) {
-        init(name, hwmap, DcMotorSimple.Direction.FORWARD);
+        init(name, hwmap, DcMotorSimple.Direction.REVERSE);
     }
     public GobildaViper(String name, HardwareMap hwmap, DcMotor.Direction direction, boolean hardware) {
         if (hardware) {

@@ -39,7 +39,7 @@ public class Servos {
     }
     public void wristGrabSample() {
         if (hardware) {
-            wrist.setPosition(0);
+            wrist.setPosition(0.1);
             wristPos = 0;
         }
     }

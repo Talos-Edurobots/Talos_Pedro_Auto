@@ -1,21 +1,16 @@
 package pedroPathing.programs;
 
-import com.pedropathing.pathgen.BezierCurve;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
-import pedroPathing.actuators.Arm;
-import pedroPathing.actuators.Servos;
-import pedroPathing.actuators.GobildaViper;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -23,6 +18,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import pedroPathing.PPConstants.FConstants;
 import pedroPathing.PPConstants.LConstants;
+import pedroPathing.actuators.Arm;
+import pedroPathing.actuators.GobildaViper;
+import pedroPathing.actuators.Servos;
 
 /** This is the program for the autonomous period on the Observation Zone for this year.
  * We start at the red side of the field, and we score the preloaded specimen
@@ -32,8 +30,8 @@ import pedroPathing.PPConstants.LConstants;
 /**
  *
 */
-@Autonomous(name="Red Observation Autonomous", group="Examples")
-public class TalosObservationAutonomous extends OpMode {
+@Autonomous(name="Red Observation Autonomous Reverse", group="Examples")
+public class TalosObservationAutonomousReverse extends OpMode {
     /** We create a Follower object from PedroPathing*/
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -46,9 +44,9 @@ public class TalosObservationAutonomous extends OpMode {
     final double ARM_ATTACH_TO_BAR_DEGREES = 77;
     final double ARM_SCORE_DEGREES = 60;
     // the starting pose of the robot
-    private final Pose startPose    = new Pose(10,  66.5, Math.toRadians(0)); //
+    private final Pose startPose    = new Pose(10,  66.5, Math.toRadians(180)); // reverse
     // the pose of the robot when it is going to score the preloaded specimen
-    private final Pose scorePreloadPose = new Pose(38, 66.5, Math.toRadians(0));
+    private final Pose scorePreloadPose = new Pose(38, 66.5, Math.toRadians(180)); // reverse
     // the control point of the bezier curve that goes from the score preloaded pose to the samples pose
 //    private final Pose samplesControlPoint1 = new Pose(14.5, 36.5, Math.toRadians(0));
     private final Pose samplesControlPoint1 = new Pose(6, 20.7, Math.toRadians(0));
@@ -175,11 +173,11 @@ public class TalosObservationAutonomous extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-                if (!(follower.isBusy() || arm.arm.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
-                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
-                    setPathState(2);
-                }
-                break;
+//                if (!(follower.isBusy() || arm.arm.isBusy())) { //  || pathTimer.getElapsedTime() < 1000
+//                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
+//                    setPathState(2);
+//                }
+//                break;
             case 2:
                 if (!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 100)) {
                     servos.intakeOpen();
