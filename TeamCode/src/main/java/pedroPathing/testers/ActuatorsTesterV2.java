@@ -76,13 +76,13 @@ public class ActuatorsTesterV2 extends LinearOpMode {
                     if (myGamepad.a.justPressed(gamepad1.a)) {
                         arm.changeState();
                     }
-                    armPosition = (int) (MAX_ARM_SPEED * scalar * (-gamepad1.left_stick_y));
+                    armPosition += (int) (MAX_ARM_SPEED * scalar * (-gamepad1.left_stick_y) * cycleTime);
                     break;
                 case VIPER:
                     if (myGamepad.a.justPressed(gamepad1.a)) {
                         viper.changeState();
                     }
-                    viperPosition = ((int) (MAX_VIPER_SPEED * scalar * (-gamepad1.left_stick_y)));
+                    viperPosition += (int) (MAX_VIPER_SPEED * scalar * (-gamepad1.left_stick_y) * cycleTime);
                     break;
                 case INTAKE:
                     servos.setIntakePosition(servos.getIntakePosition() + gamepad1.left_stick_y * cycleTime * scalar);
@@ -168,7 +168,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
         otos.setLinearUnit(DistanceUnit.CM);
         otos.setAngularUnit(AngleUnit.DEGREES);
 
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 7, -90);
         otos.setOffset(offset);
 
         otos.setLinearScalar(1.138); //known distance 182cm, measured distance 160cm, error 182/160 = 1.138
@@ -178,7 +178,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
 
         otos.resetTracking();
 
-        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 7, -90);
+        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
         otos.setPosition(currentPosition);
 
         // Get the hardware and firmware version
