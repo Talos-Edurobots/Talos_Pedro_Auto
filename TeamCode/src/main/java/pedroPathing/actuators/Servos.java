@@ -51,7 +51,7 @@ public class Servos {
     }
     public void wristGrabSpecimenFromWall() {
         if (hardware) {
-            wrist.setPosition(.45);
+            wrist.setPosition(.43);
             wristPos = .60;
         }
     }
