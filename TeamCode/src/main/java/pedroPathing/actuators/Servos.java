@@ -40,19 +40,25 @@ public class Servos {
     public void wristGrabSample() {
         if (hardware) {
             wrist.setPosition(0.1);
-            wristPos = 0;
+            wristPos = 0.1;
+        }
+    }
+    public void wristScoreBasket() {
+        if (hardware) {
+            wrist.setPosition(0.58);
+            wristPos = 0.58;
         }
     }
     public void wristFolded() {
         if (hardware) {
             wrist.setPosition(1);
-            wristPos = .7;
+            wristPos = 1;
         }
     }
     public void wristGrabSpecimenFromWall() {
         if (hardware) {
             wrist.setPosition(.43);
-            wristPos = .60;
+            wristPos = .43;
         }
     }
     public void setIntakePosition(double pos) {
