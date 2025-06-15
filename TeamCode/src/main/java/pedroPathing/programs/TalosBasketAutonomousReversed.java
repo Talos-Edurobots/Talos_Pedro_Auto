@@ -41,7 +41,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     Servos servos;
     final double ARM_SCORE_DEGREES = 130;
     final double VIPER_SCORE_MM= 500;
-    final double ARM_GRAB_DEGREES = 0; // This is the position that the arm will be in when it grabs a sample
+    final double ARM_GRAB_DEGREES = 10; // This is the position that the arm will be in when it grabs a sample
 
 
     /** This is the variable where we store the state of our auto.
@@ -64,11 +64,11 @@ public class TalosBasketAutonomousReversed extends OpMode {
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
 
     private final Pose preScorePose = new Pose(30, 120, Math.toRadians(135));
-    private final Pose scorePreloadPose = new Pose(15, 119, Math.toRadians(-45)); // 17, 125, 0
+    private final Pose scorePreloadPose = new Pose(16.5, 119, Math.toRadians(-45)); // 17, 125, 0
     private final Pose scorePreloadControlPose = new Pose(26, 81, Math.toRadians(135));
 
     /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(30, 113, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(30, 117, Math.toRadians(0));
     private final Pose pickup1ControlPose = new Pose(10, 90, Math.toRadians(0));
     private final Pose scorePickup1ControlPose = new Pose(9, 101, Math.toRadians(0));
     private final Pose scoreGrab1Pose = new Pose(17, 117, Math.toRadians(135));
@@ -131,7 +131,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
 
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(scorePreloadPose), new Point(pickup1ControlPose), new Point(pickup1Pose)))
+                .addPath(new BezierLine(new Point(scorePreloadPose)/*, new Point(pickup1ControlPose)*/, new Point(pickup1Pose)))
                 .setLinearHeadingInterpolation(scorePreloadPose.getHeading(), pickup1Pose.getHeading())
                 .build();
 
@@ -210,42 +210,47 @@ public class TalosBasketAutonomousReversed extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!(pathTimer.getElapsedTime() < 400)) {
                     servos.intakeOpen();
-//                    setPathState(4);
+                    setPathState(4);
                 }
                 break;
             case 4:
                 if(!(pathTimer.getElapsedTime() < 500)) {
-                    arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
+//                    arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
+                    servos.setWristPosition(0);
                     setPathState(5);
                 }
                 break;
             case 5:
-                if(!(arm.arm.isBusy())) {
+                if(!(arm.arm.isBusy() || pathTimer.getElapsedTime() < 500)) {
                     viper.setPositionTicks(20);
-                    follower.followPath(grabPickup1, true);
                     setPathState(6);
                 }
                 break;
             case 6:
-                if(!(viper.getCurrentPositionTicks() > 25 || pathTimer.getElapsedTime() < 1500)) {
-                    arm.setPositionDegrees(0);
+                if(!(viper.viper.isBusy() /*|| pathTimer.getElapsedTime() < 1500*/)) {
+                    arm.setVelocity(500);
+                    arm.setPositionDegrees(ARM_GRAB_DEGREES);
                     setPathState(7);
                 }
                 break;
             case 7:
-                setPathState(8);
-
+                if (arm.getCurrentPositionDegrees() < 80) {
+                    arm.setVelocity(3000);
+                    arm.setPositionDegrees(ARM_GRAB_DEGREES);
+                    setPathState(8);
+                }
                 break;
             case 8:
                 if(!follower.isBusy()) {
-                    viper.setPositionMm(50);
+                    follower.followPath(grabPickup1, true);
+//                    viper.setPositionMm(50);
                     setPathState(9);
                 }
                 break;
             case 9:
-                if(!viper.viper.isBusy()) {
+                if(!follower.isBusy()) {
                     servos.intakeCollect();
-                    setPathState(10);
+//                    setPathState(10);
                 }
                 break;
             case 10:
