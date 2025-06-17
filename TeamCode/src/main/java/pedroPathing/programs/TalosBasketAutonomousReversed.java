@@ -64,7 +64,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
 
     private final Pose preScorePose = new Pose(30, 120, Math.toRadians(135));
-    private final Pose scorePreloadPose = new Pose(16.5, 119, Math.toRadians(-45)); // 17, 125, 0
+    private final Pose scorePreloadPose = new Pose(16, 119, Math.toRadians(-45)); // 17, 125, 0
     private final Pose scorePreloadControlPose = new Pose(26, 81, Math.toRadians(135));
 
     /** Lowest (First) Sample from the Spike Mark */
@@ -75,7 +75,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     private final Pose scorePickup2ControlPose = new Pose(30, 100, Math.toRadians(0));
 
     /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(32, 124.25, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(31.5, 124, Math.toRadians(0));
     private final Pose pickup2ControlPose = new Pose(10, 90, Math.toRadians(0));
     private final Pose scoreGrab2Pose = new Pose(28, 126.75, Math.toRadians(-30));
 
