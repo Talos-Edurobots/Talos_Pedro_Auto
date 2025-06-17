@@ -410,6 +410,7 @@ public class TalosObservationAutonomous extends OpMode {
         telemetry.addData("viper pos",  viper.getCurrentPositionMm());
         telemetry.addData("arm degrees", arm.getCurrentPositionDegrees());
         telemetry.addData("follower error", follower.driveError);
+        telemetry.addData("wrist servo", servos.wrist.getPosition());
         telemetry.update();
     }
     @Override
