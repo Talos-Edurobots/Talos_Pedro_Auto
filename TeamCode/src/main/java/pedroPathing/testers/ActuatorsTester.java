@@ -19,6 +19,9 @@ public class ActuatorsTester extends LinearOpMode {
     final String INTAKE_CONFIGURATION = "intake_servo";
     final String WRIST_CONFIGURATION  = "wrist_servo";
     final String OTOS_CONFIGURATION   = "otos";
+    final String MISUMI_1_CONFIGURATION = "misumi_1";
+    final String MISUMI_2_CONFIGURATION = "misumi_2";
+
     final double ARM_TICKS_PER_DEGREE = (28 // number of encoder ticks per rotation of the bare motor
             * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
             * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
@@ -30,8 +33,10 @@ public class ActuatorsTester extends LinearOpMode {
     Arm arm;
     Slider viper;
     Servos servos;
+    DoubleSlider misumi;
     int viperPosition = 0;
     double armPosition = 0;
+    double misumiPosition =0;
     boolean ArmSetPositionMode = true; // true: sets position, false: gets position
     boolean ViperSetPositionMode = true; // true: sets position, false: gets position
     boolean showInTicks = false; // true: show ticks, false: show degrees/mm
@@ -43,6 +48,7 @@ public class ActuatorsTester extends LinearOpMode {
         arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
         viper  = new Slider(VIPER_CONFIGURATION, hardwareMap, DcMotor.Direction.REVERSE, hardware);
         servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
+        misumi = new DoubleSlider(MISUMI_1_CONFIGURATION, MISUMI_2_CONFIGURATION, hardwareMap);
         if (hardware) {
             otos = hardwareMap.get(SparkFunOTOS.class, "otos");
             configureOtos();
@@ -98,6 +104,16 @@ public class ActuatorsTester extends LinearOpMode {
                     servos.setWristPosition(servos.getWristPosition() + gamepad1.left_stick_y * cycleTime);
                     servos.setWristPosition(servos.getWristPosition() + gamepad1.right_stick_y * cycleTime * .1f);
                     break;
+                case MISUMI:
+                    misumiPosition -= (int) (gamepad1.left_stick_y * 1000 * cycleTime);
+                    misumiPosition -= (int) (gamepad1.right_stick_y * 100 * cycleTime);
+                    if (myGamepad.a.justPressed(gamepad1.a)) {
+                        if (viper.isRelaxed()) {
+                            viperPosition = viper.getCurrentPositionTicks();
+                        }
+                        viper.changeState();
+                        gamepad1.rumbleBlips(1);
+                    }
             }
 
             arm.setPositionTicks((int) armPosition);
@@ -131,10 +147,12 @@ public class ActuatorsTester extends LinearOpMode {
             telemetry.addLine((currentActuator==Actuators.INTAKE ? "--- ":"") + "Intake Position:	" + servos.getIntakePosition());
             telemetry.addLine((currentActuator==Actuators.WRIST ? "--- ":"") + "Wrist Position:	" + servos.getWristPosition());
             telemetry.addLine((currentActuator==Actuators.OTOS ? "--- ":"") + (hardware ? "OTOS Position:\t" + otosPos.toString():"Disabled OTOS"));
+            telemetry.addLine(((currentActuator==Actuators.MISUMI ? "--- ":"") + "Misumi Position:\t") + misumi.getCurrentPositionTicks() + " ticks" + ", \t" + "floating: " + misumi.isRelaxed());
             telemetry.addLine();
             telemetry.addData("cycle time", cycleTime);
             telemetry.addData("running time", getRuntime());
             telemetry.addData("is rumbling", gamepad1.isRumbling());
+
             telemetry.update();
         }
     }
@@ -143,7 +161,8 @@ public class ActuatorsTester extends LinearOpMode {
         VIPER,
         INTAKE,
         WRIST,
-        OTOS
+        OTOS,
+        MISUMI
     };
 
     void nextActuator() {

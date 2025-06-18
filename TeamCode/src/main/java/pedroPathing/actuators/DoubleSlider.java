@@ -20,4 +20,14 @@ public class DoubleSlider {
         slider1.run();
         slider2.run();
     }
+    public void setPositionTicks(int ticks) {
+        slider1.setPositionTicks(ticks);
+        slider2.setPositionTicks(ticks);
+    }
+    public boolean isRelaxed() {
+        return slider1.isRelaxed();
+    }
+    public int getCurrentPositionTicks() {
+        return slider1.getCurrentPositionTicks();
+    }
 }
