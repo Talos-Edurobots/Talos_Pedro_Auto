@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import pedroPathing.PPConstants.FConstants;
 import pedroPathing.PPConstants.LConstants;
 import pedroPathing.actuators.Arm;
-import pedroPathing.actuators.GobildaViper;
+import pedroPathing.actuators.Slider;
 import pedroPathing.actuators.Servos;
 
 /** This is the program for the autonomous period on the Observation Zone for this year.
@@ -39,7 +39,7 @@ public class TalosObservationAutonomousReverse extends OpMode {
     private int pathState;
     Arm    arm;
     Servos servos;
-    GobildaViper viper;
+    Slider viper;
     final double ARM_GRAB_SPECIMEN_DEGREES = 22;
     final double ARM_ATTACH_TO_BAR_DEGREES = 77;
     final double ARM_SCORE_DEGREES = 60;
@@ -337,7 +337,7 @@ public class TalosObservationAutonomousReverse extends OpMode {
     @Override
     public void init() {
         arm    = new Arm    ("dc_arm", hardwareMap);
-        viper  = new GobildaViper("viper_motor", hardwareMap);
+        viper  = new Slider("viper_motor", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
         telemetry.addData("Status", "init");
         telemetry.update();

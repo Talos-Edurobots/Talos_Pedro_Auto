@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import pedroPathing.PPConstants.FConstants;
 import pedroPathing.PPConstants.LConstants;
 import pedroPathing.actuators.Arm;
-import pedroPathing.actuators.GobildaViper;
+import pedroPathing.actuators.Slider;
 import pedroPathing.actuators.Servos;
 
 /**
@@ -36,7 +36,7 @@ import pedroPathing.actuators.Servos;
 public class TalosBasketAutonomousReversed extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    GobildaViper viper;
+    Slider viper;
     Arm arm;
     Servos servos;
     final double ARM_SCORE_DEGREES = 130;
@@ -496,7 +496,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        viper  = new GobildaViper("viper_motor", hardwareMap, DcMotor.Direction.REVERSE, true);
+        viper  = new Slider("viper_motor", hardwareMap, DcMotor.Direction.REVERSE, true);
         arm    = new Arm    ("dc_arm", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
 

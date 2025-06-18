@@ -25,7 +25,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     SparkFunOTOS.Pose2D otosPos;
     Actuators currentActuator;
     Arm arm;
-    GobildaViper viper;
+    Slider viper;
     Servos servos;
     int viperPosition = 0;
     int armPosition = 0;
@@ -36,7 +36,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     final double DEFAULT_SCALAR = .5;
     final double LOWER_SCALAR = .1;
     final double HIGHER_SCALAR = 1;
-    final int MAX_VIPER_SPEED = GobildaViper.mmToTicks(10);
+    final int MAX_VIPER_SPEED = Slider.mmToTicks(10);
     final int MAX_ARM_SPEED = Arm.degreesToTicks(30);
 
     GamepadButtonHandler myGamepad = new GamepadButtonHandler();
@@ -44,7 +44,7 @@ public class ActuatorsTesterV2 extends LinearOpMode {
     @Override
     public void runOpMode() {
         arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
-        viper  = new GobildaViper(VIPER_CONFIGURATION, hardwareMap, DcMotor.Direction.REVERSE, hardware);
+        viper  = new Slider(VIPER_CONFIGURATION, hardwareMap, DcMotor.Direction.REVERSE, hardware);
         servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
         if (hardware) {
             otos = hardwareMap.get(SparkFunOTOS.class, OTOS_CONFIGURATION);

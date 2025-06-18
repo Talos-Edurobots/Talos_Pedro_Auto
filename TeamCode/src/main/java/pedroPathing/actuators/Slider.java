@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class GobildaViper {
+public class Slider {
     public boolean hardware;
     private boolean relaxed;
     public DcMotor viper;
@@ -29,8 +29,8 @@ public class GobildaViper {
                             / 696
             ) // viper slide unfolded length
     );
-    // to achieve its target 0mm positionn. This has the result the motor to heat up and get stalled and get destroyed. However the viper motor always achieves the target for
-    //100mm position and thus doesn't get streesed.
+    // to achieve its target 0mm position. This has the result the motor to heat up and get stalled and get destroyed. However the viper motor always achieves the target for
+    //60ticks position and thus doesn't get streesed.
     public static int mmToTicks(double mm) {
         return (int) (mm * TICKS_PER_MM);
     }
@@ -47,10 +47,10 @@ public class GobildaViper {
         ((DcMotorEx) viper).setCurrentAlert(5, CurrentUnit.AMPS);
     }
 
-    public GobildaViper(String name, HardwareMap hwmap) {
+    public Slider(String name, HardwareMap hwmap) {
         init(name, hwmap, DcMotorSimple.Direction.REVERSE);
     }
-    public GobildaViper(String name, HardwareMap hwmap, DcMotor.Direction direction, boolean hardware) {
+    public Slider(String name, HardwareMap hwmap, DcMotor.Direction direction, boolean hardware) {
         if (hardware) {
             hardware = true;
             init(name, hwmap, direction);
@@ -114,7 +114,7 @@ public class GobildaViper {
                 while (i < 1000);
                 viper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 setPositionTicks(CALIBRATION_AMOUNT);
-                GobildaViper.this.run();
+                Slider.this.run();
             }
         };
         thread.start();
@@ -150,5 +150,6 @@ public class GobildaViper {
 
     public void setVelocity(int velocity) {
         this.velocity = velocity;
+        update();
     }
 }

@@ -98,6 +98,7 @@ public class Arm {
     }
     public void setVelocity(int vel) {
         velocity = vel;
+        update();
     }
 
     public void relax() {

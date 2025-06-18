@@ -20,7 +20,7 @@ import pedroPathing.PPConstants.FConstants;
 import pedroPathing.PPConstants.LConstants;
 import pedroPathing.actuators.Arm;
 import pedroPathing.actuators.Servos;
-import pedroPathing.actuators.GobildaViper;
+import pedroPathing.actuators.Slider;
 
 /**
  * This is an example auto that showcases movement and control of two servos autonomously.
@@ -36,7 +36,7 @@ import pedroPathing.actuators.GobildaViper;
 public class TalosBasketAutonomous extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    GobildaViper viper;
+    Slider viper;
     Arm arm;
     Servos servos;
     final double ARM_SCORE_DEGREES = 107;
@@ -476,7 +476,7 @@ public class TalosBasketAutonomous extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        viper  = new GobildaViper("viper_motor", hardwareMap, DcMotor.Direction.REVERSE, true);
+        viper  = new Slider("viper_motor", hardwareMap, DcMotor.Direction.REVERSE, true);
         arm    = new Arm    ("dc_arm", hardwareMap);
         servos = new Servos ("intake_servo", "wrist_servo", hardwareMap);
 
