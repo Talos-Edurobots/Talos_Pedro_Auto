@@ -35,7 +35,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 
 
-@TeleOp(name="TeleOp stable", group="Robot")
+@TeleOp(name="TeleOp sliders test", group="Robot")
 //@Disabled
 public class TeleOpSliders extends LinearOpMode {
     /* Declare OpMode members. */
@@ -234,14 +234,9 @@ public class TeleOpSliders extends LinearOpMode {
                 wrist.setPosition(1);
             }
 
-            if (gamepad1.dpad_right) {
-                sliderPosition += (int) (1000 * cycleTime);
-            }
-            else if (gamepad1.dpad_left) {
-                sliderPosition -= (int) (1000 * cycleTime);
-            }
+            sliderPosition -= (int) (gamepad2.right_stick_y * 1000 * cycleTime); // we move the slider position based on the right stick y axis input
             // we normalize the slider position
-            sliderPosition = Math.max(0, Math.min(sliderPosition, 4500)); // limit the slider position between 0 and 10000 ticks
+            sliderPosition = Math.max(0, Math.min(sliderPosition, 1450)); // limit the slider position between 0 and 10000 ticks
             // we set the target position for the sliders
             leftSlider.setTargetPosition(sliderPosition);
             rightSlider.setTargetPosition(sliderPosition);
@@ -298,8 +293,8 @@ public class TeleOpSliders extends LinearOpMode {
         rightBackDrive  = hardwareMap.dcMotor.get("right_back");
         viperMotor      = hardwareMap.dcMotor.get("viper_motor"); // linear viper slide motor
         armMotor        = hardwareMap.get(DcMotor.class, "dc_arm"); //the arm motor
-        leftSlider      = hardwareMap.dcMotor.get("left_slider"); // left slider motor
-        rightSlider     = hardwareMap.dcMotor.get("right_slider"); // right slider motor
+        leftSlider      = hardwareMap.dcMotor.get("left_misumi"); // left slider motor
+        rightSlider     = hardwareMap.dcMotor.get("right_misumi"); // right slider motor
 
         // define the optical odometry sensor object
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
@@ -351,9 +346,12 @@ public class TeleOpSliders extends LinearOpMode {
         wristHorizontal();
         intakeOpen();
 
-        rightSlider.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftSlider.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightSlider.setDirection(DcMotorSimple.Direction.FORWARD);
         leftSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightSlider.setTargetPosition(0);
+        leftSlider.setTargetPosition(0);
         leftSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlider.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -379,7 +377,11 @@ public class TeleOpSliders extends LinearOpMode {
     public void output(){
         telemetry.addData("Motor Current:",((DcMotorEx) leftBackDrive).getCurrent(CurrentUnit.AMPS));
         /* send telemetry to the driver of the arm's current position and target position */
-        telemetry.addLine("Version: Android 5 orfanak");
+        telemetry.addLine("Version: misumi test");
+        telemetry.addData("left current", ((DcMotorEx) leftSlider).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("right current", ((DcMotorEx) rightSlider).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("left position", leftSlider.getCurrentPosition());
+        telemetry.addData("right position", rightSlider.getCurrentPosition());
         telemetry.addData("armMotor Current:",((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("viperMotor Current:",((DcMotorEx) viperMotor).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("arm target Position: ", armMotor.getTargetPosition());

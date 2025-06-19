@@ -28,12 +28,12 @@ public class SimpleSliders extends LinearOpMode {
 
         while (opModeIsActive()) {
             if (gamepad1.a) {
-                r += 1;
-                l += 1;
+                r += 100;
+                l += 100;
             }
             else if (gamepad1.b) {
-                r -= 1;
-                l -= 1;
+                r -= 100;
+                l -= 100;
             }
             r = Math.min(r, 1450);
             l = Math.min(l, 1450);

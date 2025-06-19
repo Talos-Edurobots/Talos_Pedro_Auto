@@ -39,9 +39,9 @@ public class TalosBasketAutonomousReversed extends OpMode {
     Slider viper;
     Arm arm;
     Servos servos;
-    final double ARM_SCORE_DEGREES = 130;
+    final double ARM_SCORE_DEGREES = 133;
     final double VIPER_SCORE_MM= 500;
-    final double ARM_GRAB_DEGREES = 11.2; // This is the position that the arm will be in when it grabs a sample
+    final double ARM_GRAB_DEGREES = 10.8; // This is the position that the arm will be in when it grabs a sample
 
 
     /** This is the variable where we store the state of our auto.
@@ -63,25 +63,25 @@ public class TalosBasketAutonomousReversed extends OpMode {
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
 
-    private final Pose preScorePose = new Pose(30, 120, Math.toRadians(135));
-    private final Pose scorePreloadPose = new Pose(16, 119, Math.toRadians(-45)); // 17, 125, 0
+    private final Pose preScorePose = new Pose(30, 119.5, Math.toRadians(135));
+    private final Pose scorePreloadPose = new Pose(15.3, 118.3, Math.toRadians(-45)); // 17, 125, 0
     private final Pose scorePreloadControlPose = new Pose(26, 81, Math.toRadians(135));
 
     /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(29.25, 117, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(27.85, 117, Math.toRadians(0));
     private final Pose pickup1ControlPose = new Pose(10, 90, Math.toRadians(0));
     private final Pose scorePickup1ControlPose = new Pose(9, 101, Math.toRadians(0));
-    private final Pose scoreGrab1Pose = new Pose(25.5, 120, Math.toRadians(-45));
+    private final Pose scoreGrab1Pose = new Pose(22.8, 120.5, Math.toRadians(-45));
     private final Pose scorePickup2ControlPose = new Pose(30, 100, Math.toRadians(0));
 
     /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(31.5, 124, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(28.7, 123, Math.toRadians(0));
     private final Pose pickup2ControlPose = new Pose(10, 90, Math.toRadians(0));
-    private final Pose scoreGrab2Pose = new Pose(28, 126.75, Math.toRadians(-30));
+    private final Pose scoreGrab2Pose = new Pose(23.5, 125, Math.toRadians(-30));
 
     /** Highest (Third) Sample from the Spike Mark */
-    private final Pose pickup3Pose = new Pose(49, 123.5, Math.toRadians(90));
-    private final Pose scoreGrab3Pose = new Pose(20, 120, Math.toRadians(-45));
+    private final Pose pickup3Pose = new Pose(51, 123.5, Math.toRadians(90));
+    private final Pose scoreGrab3Pose = new Pose(20.5, 120, Math.toRadians(-45));
 
     /** Park Pose for our robot, after we do all of the scoring. */
     private final Pose parkPose = new Pose(65, 98, Math.toRadians(90));
@@ -399,37 +399,43 @@ public class TalosBasketAutonomousReversed extends OpMode {
                 }
                 break;
             case 33:
-//                setPathState(34);
+                if (!(follower.isBusy())) {
+                    arm.setPositionDegrees(ARM_SCORE_DEGREES);
+                    setPathState(34);
+                }
 
                 break;
             case 34:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                setPathState(35);
+                if(!arm.arm.isBusy()) {
+                    viper.setPositionMm(VIPER_SCORE_MM);
+                    setPathState(35);
+                }
 
                 break;
             case 35:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!arm.arm.isBusy()) {
-                    viper.setPositionMm(VIPER_SCORE_MM);
+                if (!viper.viper.isBusy()) {
+                    servos.wristScoreBasket();
                     setPathState(36);
                 }
                 break;
             case 36:
-                if(!(viper.viper.isBusy() || follower.isBusy())) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     servos.intakeOpen();
                     setPathState(37);
                 }
                 break;
             case 37:
                 if(!(pathTimer.getElapsedTime() < 800)) {
-                    arm.setPositionDegrees(ARM_SCORE_DEGREES+5);
+                    servos.wristGrabSample();
                     setPathState(38);
                 }
                 break;
             case 38:
-                if(!(arm.arm.isBusy())) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
                     viper.setPositionTicks(50);
-                    follower.followPath(park, true);
+//                    follower.followPath(park, true);
                     setPathState(39);
                 }
                 break;
@@ -456,6 +462,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
                     setPathState(43);
                 }
                 break;
+
         }
     }
 
