@@ -19,8 +19,8 @@ public class ActuatorsTester extends LinearOpMode {
     final String INTAKE_CONFIGURATION = "intake_servo";
     final String WRIST_CONFIGURATION  = "wrist_servo";
     final String OTOS_CONFIGURATION   = "otos";
-    final String MISUMI_1_CONFIGURATION = "misumi_1";
-    final String MISUMI_2_CONFIGURATION = "misumi_2";
+    final String MISUMI_1_CONFIGURATION = "left_misumi";
+    final String MISUMI_2_CONFIGURATION = "right_misumi";
 
     final double ARM_TICKS_PER_DEGREE = (28 // number of encoder ticks per rotation of the bare motor
             * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -109,18 +109,20 @@ public class ActuatorsTester extends LinearOpMode {
                     misumiPosition -= (int) (gamepad1.right_stick_y * 100 * cycleTime);
                     if (myGamepad.a.justPressed(gamepad1.a)) {
                         if (viper.isRelaxed()) {
-                            viperPosition = viper.getCurrentPositionTicks();
+                            misumiPosition = misumi.getCurrentPositionTicks();
                         }
-                        viper.changeState();
+                        misumi.changeState();
                         gamepad1.rumbleBlips(1);
                     }
             }
 
             arm.setPositionTicks((int) armPosition);
             viper.setPositionTicks(viperPosition);
+            misumi.setPositionTicks((int) misumiPosition);
 
             arm.update();
             viper.update();
+            misumi.update();
             if (myGamepad.dpad_up.justPressed(gamepad1.dpad_up)) {
                 previousActuator();
             }
