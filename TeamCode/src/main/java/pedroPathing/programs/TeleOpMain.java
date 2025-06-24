@@ -362,7 +362,8 @@ public class TeleOpMain extends LinearOpMode {
         telemetry.addData("intake pos", intake.getPosition());
         telemetry.addData("X coordinate", pos.x);
         telemetry.addData("Y coordinate", pos.y);
-        telemetry.addData("Heading angle", pos.h);
+        telemetry.addData("Heading angle otos", pos.h);
+        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 
