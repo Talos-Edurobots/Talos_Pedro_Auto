@@ -10,6 +10,7 @@ import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -33,6 +34,7 @@ import pedroPathing.actuators.Slider;
  */
 
 @Autonomous(name = "Red Basket Autonomous", group = "Examples")
+@Disabled
 public class TalosBasketAutonomous extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;

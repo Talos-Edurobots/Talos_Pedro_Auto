@@ -1,4 +1,4 @@
-package pedroPathing.programs;
+package pedroPathing.ftc_competition;
 
 import com.pedropathing.pathgen.BezierCurve;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;

@@ -5,6 +5,7 @@ import com.pedropathing.localization.Pose;
 import com.pedropathing.util.Constants;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -42,7 +43,7 @@ import pedroPathing.PPConstants.LConstants;
 
 
 @TeleOp(name="TeleOp v2", group="Robot")
-//@Disabled
+@Disabled
 public class TeleOpV2 extends LinearOpMode {
     /* Declare OpMode members. */
     private Follower follower;

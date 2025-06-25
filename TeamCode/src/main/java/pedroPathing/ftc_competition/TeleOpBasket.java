@@ -1,4 +1,4 @@
-package pedroPathing.programs;
+package pedroPathing.ftc_competition;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -35,9 +35,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 
 
-@TeleOp(name="specimen teleop", group="Robot")
+@TeleOp(name="TeleOp Basket", group="Robot")
 //@Disabled
-public class SpecimenTeleOp extends LinearOpMode {
+public class TeleOpBasket extends LinearOpMode {
     /* Declare OpMode members. */
     public DcMotor      leftFrontDrive; //the left front drivetrain motor
     public DcMotor      rightFrontDrive; //the right front drivetrain motor
@@ -142,7 +142,7 @@ public class SpecimenTeleOp extends LinearOpMode {
             }
             else if (gamepad2.y){ //ps4 triangle
                 /* This is the correct height to score the sample in the HIGH BASKET */
-                grabSpecimen();
+                armScoreSampleInHigh();
             }
             else if (gamepad2.x) { //ps4 square
                 /* moves the arm to an angle position for scoring specimens */
@@ -362,7 +362,8 @@ public class SpecimenTeleOp extends LinearOpMode {
         telemetry.addData("intake pos", intake.getPosition());
         telemetry.addData("X coordinate", pos.x);
         telemetry.addData("Y coordinate", pos.y);
-        telemetry.addData("Heading angle", pos.h);
+        telemetry.addData("Heading angle otos", pos.h);
+        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 
@@ -433,9 +434,9 @@ public class SpecimenTeleOp extends LinearOpMode {
         wrist.setPosition(0);
         armPosition = armDegreesToTicks(88); // 165
     }
-    public void grabSpecimen() {
-        armPosition = armDegreesToTicks(22);
-        wrist.setPosition(.43);
+    public void armScoreSampleInHigh() {
+        armPosition = armDegreesToTicks(110); // 110
+        wrist.setPosition(0);
     } // 90
     public void armAttachHangingHook() {
         armPosition = armDegreesToTicks(120);
@@ -456,8 +457,8 @@ public class SpecimenTeleOp extends LinearOpMode {
             than the other, it "wins out". This variable is then multiplied by our FUDGE_FACTOR.
             The FUDGE_FACTOR is the number of degrees that we can adjust the arm by with this function. */
         armPositionFudgeFactor = (int) (
-                (armDegreesToTicks(15) * gamepad2.right_trigger) +
-                        (armDegreesToTicks(15) * (-gamepad2.left_trigger))
+                (armDegreesToTicks(15) * gamepad2.right_trigger) -
+                        (armDegreesToTicks(25) * (gamepad2.left_trigger))
         );
     }
     public void setArmTargetPosition() {
@@ -466,7 +467,7 @@ public class SpecimenTeleOp extends LinearOpMode {
             our armLiftComp, which adjusts the arm height for different lift extensions.
             We also set the target velocity (speed) the motor runs at, and use setMode to run it.*/
 
-        armMotor.setTargetPosition(Math.max(armPosition, minArmPos) + armPositionFudgeFactor + armLiftComp);
+        armMotor.setTargetPosition(Math.max((armPosition+ armPositionFudgeFactor), minArmPos) + armLiftComp);
     }
 
     public void runArm() {
@@ -568,9 +569,12 @@ public class SpecimenTeleOp extends LinearOpMode {
         // press options button to reset IMU
         if (gamepad1.options) {
             imu.resetYaw();
+            otos.calibrateImu();
         }
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = pos.h;
+
 
         // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
@@ -583,7 +587,7 @@ public class SpecimenTeleOp extends LinearOpMode {
         // but only if at least one is out of the range [-1, 1]
         // we multiply denominator variable by a variable named "straferSpeedFactor" with a value greater than 1
         // in order to reduce the strafing speed. The normal strafing speed is to high and thus difficult to control the robot
-        double speed = .5 + .5 * (gamepad1.right_trigger) - .4 * (gamepad1.left_trigger);
+        double speed = 1 - gamepad1.right_trigger;
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         double frontLeftPower = speed*((rotY + rotX + rx) / denominator);
         double backLeftPower = speed*((rotY - rotX + rx) / denominator);

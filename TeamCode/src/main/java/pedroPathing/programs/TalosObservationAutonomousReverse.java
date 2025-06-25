@@ -10,6 +10,7 @@ import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -31,6 +32,7 @@ import pedroPathing.actuators.Servos;
  *
 */
 @Autonomous(name="Red Observation Autonomous Reverse", group="Examples")
+@Disabled
 public class TalosObservationAutonomousReverse extends OpMode {
     /** We create a Follower object from PedroPathing*/
     private Follower follower;

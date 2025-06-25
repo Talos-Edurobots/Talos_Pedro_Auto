@@ -1,13 +1,12 @@
-package pedroPathing.programs;
+package pedroPathing.ftc_competition;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -36,9 +35,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 
 
-@TeleOp(name="TeleOp sliders test", group="Robot")
-@Disabled
-public class TeleOpSliders extends LinearOpMode {
+@TeleOp(name="specimen teleop", group="Robot")
+//@Disabled
+public class SpecimenTeleOp extends LinearOpMode {
     /* Declare OpMode members. */
     public DcMotor      leftFrontDrive; //the left front drivetrain motor
     public DcMotor      rightFrontDrive; //the right front drivetrain motor
@@ -46,8 +45,6 @@ public class TeleOpSliders extends LinearOpMode {
     public DcMotor      rightBackDrive; //the right back drivetrain motor
     public DcMotor      armMotor; //the arm motor
     public DcMotor      viperMotor; // the viper slide motor
-    public DcMotor      leftSlider;
-    public DcMotor      rightSlider;
     public Servo        intake; //the active intake servo
     public Servo        wrist; //the wrist servo
 
@@ -57,7 +54,6 @@ public class TeleOpSliders extends LinearOpMode {
     /* Variables that are used to set the arm and viper to a specific position */
     int armPosition;
     int armPositionFudgeFactor;
-    int sliderPosition;
 
     // these constants store the minimum and maximum values for the viper motor after initialization
     final int MAX_VIPER_POSITION = viperMotorMmToTicks(480); // max viper extension (48 cm)
@@ -146,7 +142,7 @@ public class TeleOpSliders extends LinearOpMode {
             }
             else if (gamepad2.y){ //ps4 triangle
                 /* This is the correct height to score the sample in the HIGH BASKET */
-                armScoreSampleInHigh();
+                grabSpecimen();
             }
             else if (gamepad2.x) { //ps4 square
                 /* moves the arm to an angle position for scoring specimens */
@@ -235,18 +231,6 @@ public class TeleOpSliders extends LinearOpMode {
                 wrist.setPosition(1);
             }
 
-            sliderPosition -= (int) (gamepad2.right_stick_y * 1000 * cycleTime); // we move the slider position based on the right stick y axis input
-            // we normalize the slider position
-            sliderPosition = Math.max(0, Math.min(sliderPosition, 1450)); // limit the slider position between 0 and 10000 ticks
-            // we set the target position for the sliders
-            leftSlider.setTargetPosition(sliderPosition);
-            rightSlider.setTargetPosition(sliderPosition);
-            // we run the sliders
-            leftSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlider.setPower(1);
-            rightSlider.setPower(1);
-
             // handling arm's positioning
             configureFudge();
             setArmTargetPosition();
@@ -294,8 +278,6 @@ public class TeleOpSliders extends LinearOpMode {
         rightBackDrive  = hardwareMap.dcMotor.get("right_back");
         viperMotor      = hardwareMap.dcMotor.get("viper_motor"); // linear viper slide motor
         armMotor        = hardwareMap.get(DcMotor.class, "dc_arm"); //the arm motor
-        leftSlider      = hardwareMap.dcMotor.get("left_misumi"); // left slider motor
-        rightSlider     = hardwareMap.dcMotor.get("right_misumi"); // right slider motor
 
         // define the optical odometry sensor object
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
@@ -347,18 +329,6 @@ public class TeleOpSliders extends LinearOpMode {
         wristHorizontal();
         intakeOpen();
 
-        leftSlider.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightSlider.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlider.setTargetPosition(0);
-        leftSlider.setTargetPosition(0);
-        leftSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlider.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightSlider.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
 
         /* Send telemetry message to signify robot waiting */
         telemetry.addLine("Robot Ready.");
@@ -378,11 +348,7 @@ public class TeleOpSliders extends LinearOpMode {
     public void output(){
         telemetry.addData("Motor Current:",((DcMotorEx) leftBackDrive).getCurrent(CurrentUnit.AMPS));
         /* send telemetry to the driver of the arm's current position and target position */
-        telemetry.addLine("Version: misumi test");
-        telemetry.addData("left current", ((DcMotorEx) leftSlider).getCurrent(CurrentUnit.AMPS));
-        telemetry.addData("right current", ((DcMotorEx) rightSlider).getCurrent(CurrentUnit.AMPS));
-        telemetry.addData("left position", leftSlider.getCurrentPosition());
-        telemetry.addData("right position", rightSlider.getCurrentPosition());
+        telemetry.addLine("Version: Android 5 orfanak");
         telemetry.addData("armMotor Current:",((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("viperMotor Current:",((DcMotorEx) viperMotor).getCurrent(CurrentUnit.AMPS));
         telemetry.addData("arm target Position: ", armMotor.getTargetPosition());
@@ -397,6 +363,7 @@ public class TeleOpSliders extends LinearOpMode {
         telemetry.addData("X coordinate", pos.x);
         telemetry.addData("Y coordinate", pos.y);
         telemetry.addData("Heading angle", pos.h);
+        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 
@@ -467,9 +434,9 @@ public class TeleOpSliders extends LinearOpMode {
         wrist.setPosition(0);
         armPosition = armDegreesToTicks(88); // 165
     }
-    public void armScoreSampleInHigh() {
-        armPosition = armDegreesToTicks(110); // 110
-        wrist.setPosition(0);
+    public void grabSpecimen() {
+        armPosition = armDegreesToTicks(22);
+        wrist.setPosition(.43);
     } // 90
     public void armAttachHangingHook() {
         armPosition = armDegreesToTicks(120);
@@ -490,8 +457,8 @@ public class TeleOpSliders extends LinearOpMode {
             than the other, it "wins out". This variable is then multiplied by our FUDGE_FACTOR.
             The FUDGE_FACTOR is the number of degrees that we can adjust the arm by with this function. */
         armPositionFudgeFactor = (int) (
-                (armDegreesToTicks(15) * gamepad2.right_trigger) +
-                        (armDegreesToTicks(15) * (-gamepad2.left_trigger))
+                (armDegreesToTicks(15) * gamepad2.right_trigger) -
+                        (armDegreesToTicks(25) * gamepad2.left_trigger)
         );
     }
     public void setArmTargetPosition() {
@@ -500,7 +467,7 @@ public class TeleOpSliders extends LinearOpMode {
             our armLiftComp, which adjusts the arm height for different lift extensions.
             We also set the target velocity (speed) the motor runs at, and use setMode to run it.*/
 
-        armMotor.setTargetPosition(Math.max(armPosition, minArmPos) + armPositionFudgeFactor + armLiftComp);
+        armMotor.setTargetPosition(Math.max((armPosition + armPositionFudgeFactor), minArmPos) + armLiftComp);
     }
 
     public void runArm() {
@@ -602,9 +569,11 @@ public class TeleOpSliders extends LinearOpMode {
         // press options button to reset IMU
         if (gamepad1.options) {
             imu.resetYaw();
+            otos.calibrateImu();
         }
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = pos.h;
 
         // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
@@ -617,7 +586,7 @@ public class TeleOpSliders extends LinearOpMode {
         // but only if at least one is out of the range [-1, 1]
         // we multiply denominator variable by a variable named "straferSpeedFactor" with a value greater than 1
         // in order to reduce the strafing speed. The normal strafing speed is to high and thus difficult to control the robot
-        double speed = .5 + .5 * (gamepad1.right_trigger) - .4 * (gamepad1.left_trigger);
+        double speed = 1 - gamepad1.right_trigger;
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         double frontLeftPower = speed*((rotY + rotX + rx) / denominator);
         double backLeftPower = speed*((rotY - rotX + rx) / denominator);
