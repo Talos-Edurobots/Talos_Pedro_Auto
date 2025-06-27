@@ -14,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import pedroPathing.actuators.Arm;
+
 /*
  * This is (mostly) the OpMode used in the goBILDA Robot in 3 Days for the 24-25 Into The Deep FTC Season.
  * https://youtube.com/playlist?list=PLpytbFEB5mLcWxf6rOHqbmYjDi9BbK00p&si=NyQLwyIkcZvZEirP (playlist of videos)
@@ -231,6 +233,13 @@ public class SpecimenTeleOp extends LinearOpMode {
                 wrist.setPosition(1);
             }
 
+            if (gamepad1.x) {
+                calibrateArm();
+            }
+            else if (gamepad1.y) {
+                calibrateArmWithRotation();
+            }
+
             // handling arm's positioning
             configureFudge();
             setArmTargetPosition();
@@ -346,7 +355,6 @@ public class SpecimenTeleOp extends LinearOpMode {
     }
 
     public void output(){
-        telemetry.addData("Motor Current:",((DcMotorEx) leftBackDrive).getCurrent(CurrentUnit.AMPS));
         /* send telemetry to the driver of the arm's current position and target position */
         telemetry.addLine("Version: Android 5 orfanak");
         telemetry.addData("armMotor Current:",((DcMotorEx) armMotor).getCurrent(CurrentUnit.AMPS));
@@ -362,8 +370,10 @@ public class SpecimenTeleOp extends LinearOpMode {
         telemetry.addData("intake pos", intake.getPosition());
         telemetry.addData("X coordinate", pos.x);
         telemetry.addData("Y coordinate", pos.y);
-        telemetry.addData("Heading angle", pos.h);
-        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData("Heading angle otos radians", pos.h);
+        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        telemetry.addData("Heading angle otos degrees", Math.toDegrees(pos.h));
+        telemetry.addData("Heading angle imu degrees", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 
@@ -428,7 +438,7 @@ public class SpecimenTeleOp extends LinearOpMode {
     // these are functions for arm movement
     public void armCollect(){
         wrist.setPosition(0);
-        armPosition = 180;
+        armPosition = armDegreesToTicks(7);
     }
     public void armScoreSpecimen() {
         wrist.setPosition(0);
@@ -552,6 +562,20 @@ public class SpecimenTeleOp extends LinearOpMode {
         setViperTargetPosition();
         runViper();
     }
+    public void calibrateArm() {
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        armMotor.setPower(0);
+        sleep(1000);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void calibrateArmWithRotation() {
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setPower(-.5);
+        sleep(1000);
+        calibrateArm();
+    }
     public void runViper() {
         ((DcMotorEx) viperMotor).setVelocity(3000); //velocity of the viper slide in ticks/s
         viperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -610,7 +634,7 @@ public class SpecimenTeleOp extends LinearOpMode {
         // myOtos.setLinearUnit(DistanceUnit.METER);
         otos.setLinearUnit(DistanceUnit.CM);
         // myOtos.setAngularUnit(AnguleUnit.RADIANS);
-        otos.setAngularUnit(AngleUnit.DEGREES);
+        otos.setAngularUnit(AngleUnit.RADIANS);
 
         // Assuming you've mounted your sensor to a robot and it's not centered,
         // you can specify the offset for the sensor relative to the center of the
@@ -623,7 +647,7 @@ public class SpecimenTeleOp extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.9, 0, -90);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.9, 0, Math.toRadians(0));
         otos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for

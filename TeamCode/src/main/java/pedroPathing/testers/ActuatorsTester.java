@@ -33,7 +33,7 @@ public class ActuatorsTester extends LinearOpMode {
     Arm arm;
     Slider viper;
     Servos servos;
-    DoubleSlider misumi;
+//    DoubleSlider misumi;
     int viperPosition = 0;
     double armPosition = 0;
     double misumiPosition =0;
@@ -48,7 +48,7 @@ public class ActuatorsTester extends LinearOpMode {
         arm    = new Arm(ARM_CONFIGURATION, hardwareMap, hardware);
         viper  = new Slider(VIPER_CONFIGURATION, hardwareMap, DcMotor.Direction.REVERSE, hardware);
         servos = new Servos(INTAKE_CONFIGURATION, WRIST_CONFIGURATION, hardwareMap, hardware);
-        misumi = new DoubleSlider(MISUMI_1_CONFIGURATION, MISUMI_2_CONFIGURATION, hardwareMap);
+//        misumi = new DoubleSlider(MISUMI_1_CONFIGURATION, MISUMI_2_CONFIGURATION, hardwareMap);
         if (hardware) {
             otos = hardwareMap.get(SparkFunOTOS.class, "otos");
             configureOtos();
@@ -104,25 +104,25 @@ public class ActuatorsTester extends LinearOpMode {
                     servos.setWristPosition(servos.getWristPosition() + gamepad1.left_stick_y * cycleTime);
                     servos.setWristPosition(servos.getWristPosition() + gamepad1.right_stick_y * cycleTime * .1f);
                     break;
-                case MISUMI:
-                    misumiPosition -= (int) (gamepad1.left_stick_y * 1000 * cycleTime);
-                    misumiPosition -= (int) (gamepad1.right_stick_y * 100 * cycleTime);
-                    if (myGamepad.a.justPressed(gamepad1.a)) {
-                        if (viper.isRelaxed()) {
-                            misumiPosition = misumi.getCurrentPositionTicks();
-                        }
-                        misumi.changeState();
-                        gamepad1.rumbleBlips(1);
-                    }
+//                case MISUMI:
+//                    misumiPosition -= (int) (gamepad1.left_stick_y * 1000 * cycleTime);
+//                    misumiPosition -= (int) (gamepad1.right_stick_y * 100 * cycleTime);
+//                    if (myGamepad.a.justPressed(gamepad1.a)) {
+//                        if (viper.isRelaxed()) {
+//                            misumiPosition = misumi.getCurrentPositionTicks();
+//                        }
+//                        misumi.changeState();
+//                        gamepad1.rumbleBlips(1);
+//                    }
             }
 
             arm.setPositionTicks((int) armPosition);
             viper.setPositionTicks(viperPosition);
-            misumi.setPositionTicks((int) misumiPosition);
+//            misumi.setPositionTicks((int) misumiPosition);
 
             arm.update();
             viper.update();
-            misumi.update();
+//            misumi.update();
             if (myGamepad.dpad_up.justPressed(gamepad1.dpad_up)) {
                 previousActuator();
             }
@@ -149,7 +149,7 @@ public class ActuatorsTester extends LinearOpMode {
             telemetry.addLine((currentActuator==Actuators.INTAKE ? "--- ":"") + "Intake Position:	" + servos.getIntakePosition());
             telemetry.addLine((currentActuator==Actuators.WRIST ? "--- ":"") + "Wrist Position:	" + servos.getWristPosition());
             telemetry.addLine((currentActuator==Actuators.OTOS ? "--- ":"") + (hardware ? "OTOS Position:\t" + otosPos.toString():"Disabled OTOS"));
-            telemetry.addLine(((currentActuator==Actuators.MISUMI ? "--- ":"") + "Misumi Position:\t") + misumi.getCurrentPositionTicks() + " ticks" + ", \t" + "floating: " + misumi.isRelaxed());
+//            telemetry.addLine(((currentActuator==Actuators.MISUMI ? "--- ":"") + "Misumi Position:\t") + misumi.getCurrentPositionTicks() + " ticks" + ", \t" + "floating: " + misumi.isRelaxed());
             telemetry.addLine();
             telemetry.addData("cycle time", cycleTime);
             telemetry.addData("running time", getRuntime());
@@ -164,7 +164,7 @@ public class ActuatorsTester extends LinearOpMode {
         INTAKE,
         WRIST,
         OTOS,
-        MISUMI
+//        MISUMI
     };
 
     void nextActuator() {

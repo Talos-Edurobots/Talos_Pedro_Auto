@@ -231,6 +231,13 @@ public class TeleOpBasket extends LinearOpMode {
                 wrist.setPosition(1);
             }
 
+            if (gamepad1.x) {
+                calibrateArm();
+            }
+            else if (gamepad1.y) {
+                calibrateArmWithRotation();
+            }
+
             // handling arm's positioning
             configureFudge();
             setArmTargetPosition();
@@ -475,6 +482,21 @@ public class TeleOpBasket extends LinearOpMode {
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION); // we finally run the arm motor
     }
 
+    public void calibrateArm() {
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        armMotor.setPower(0);
+        sleep(1000);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void calibrateArmWithRotation() {
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setPower(-.5);
+        sleep(1000);
+        calibrateArm();
+    }
+
     //    ---------------- | intake system | -----------------------------------------------------------
 
     public void intakeOpen() {
@@ -611,7 +633,7 @@ public class TeleOpBasket extends LinearOpMode {
         // myOtos.setLinearUnit(DistanceUnit.METER);
         otos.setLinearUnit(DistanceUnit.CM);
         // myOtos.setAngularUnit(AnguleUnit.RADIANS);
-        otos.setAngularUnit(AngleUnit.DEGREES);
+        otos.setAngularUnit(AngleUnit.RADIANS);
 
         // Assuming you've mounted your sensor to a robot and it's not centered,
         // you can specify the offset for the sensor relative to the center of the
@@ -624,7 +646,7 @@ public class TeleOpBasket extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.9, 0, -90);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.9, 0, 0);
         otos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for
