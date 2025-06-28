@@ -369,8 +369,10 @@ public class TeleOpBasket extends LinearOpMode {
         telemetry.addData("intake pos", intake.getPosition());
         telemetry.addData("X coordinate", pos.x);
         telemetry.addData("Y coordinate", pos.y);
-        telemetry.addData("Heading angle otos", pos.h);
-        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData("Heading angle otos radians", pos.h);
+        telemetry.addData("Heading angle imu", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        telemetry.addData("Heading angle otos degrees", Math.toDegrees(pos.h));
+        telemetry.addData("Heading angle imu degrees", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.update();
     }
 
@@ -591,7 +593,7 @@ public class TeleOpBasket extends LinearOpMode {
         // press options button to reset IMU
         if (gamepad1.options) {
             imu.resetYaw();
-            otos.calibrateImu();
+            otos.resetTracking();
         }
 
 //        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);

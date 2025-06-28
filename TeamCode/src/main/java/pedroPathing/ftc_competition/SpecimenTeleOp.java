@@ -593,7 +593,7 @@ public class SpecimenTeleOp extends LinearOpMode {
         // press options button to reset IMU
         if (gamepad1.options) {
             imu.resetYaw();
-            otos.calibrateImu();
+            otos.resetTracking();
         }
 
 //        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
