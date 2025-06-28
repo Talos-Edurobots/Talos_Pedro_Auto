@@ -57,18 +57,18 @@ public class TalosObservationAutonomous extends OpMode {
 //    private final Pose samplesPose = new Pose(55, 34.5, Math.toRadians(0));
     private final Pose samplesPose = new Pose(60, 24, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the first sample in order to push it in the observation zone
-    private final Pose sample1Pose = new Pose(60, 31, Math.toRadians(0));
+    private final Pose sample1Pose = new Pose(60, 29, Math.toRadians(0));
     // the pose of the robot when it pushes the first sample in the observation zone
     private final Pose sample1ControlPose = new Pose(60, 25, Math.toRadians(0));
 //    private final Pose attach1Pose = new Pose(21, 31.5, Math.toRadians(0));
-    private final Pose attach1Pose = new Pose(30, 29, Math.toRadians(0));
+    private final Pose attach1Pose = new Pose(30, 27, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the second sample in order to push it in the observation zone
-    private final Pose sample2Pose = new Pose(60, 20, Math.toRadians(0));
+    private final Pose sample2Pose = new Pose(60, 18, Math.toRadians(0));
     // the pose of the robot when it pushes the second sample in the observation zone
 //    private final Pose sample2ControlPose = new Pose(100, 14.5, Math.toRadians(0));
     private final Pose sample2ControlPose = new Pose(60, 30, Math.toRadians(0));
 //    private final Pose attach2Pose = new Pose(21, 16.5, Math.toRadians(0));
-    private final Pose attach2Pose = new Pose(21, 20, Math.toRadians(0));
+    private final Pose attach2Pose = new Pose(21, 18, Math.toRadians(0));
     // the pose of the robot when the back side of it is next to the third sample in order to push it in the observation zone
     private final Pose sample3Pose = new Pose(60, 13, Math.toRadians(0));
     // the pose of the robot when it pushes the third sample in the observation zone

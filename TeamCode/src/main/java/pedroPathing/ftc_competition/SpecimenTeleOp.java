@@ -445,7 +445,7 @@ public class SpecimenTeleOp extends LinearOpMode {
         armPosition = armDegreesToTicks(88); // 165
     }
     public void grabSpecimen() {
-        armPosition = armDegreesToTicks(22);
+        armPosition = armDegreesToTicks(23);
         wrist.setPosition(.43);
     } // 90
     public void armAttachHangingHook() {

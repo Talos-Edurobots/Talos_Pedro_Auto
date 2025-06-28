@@ -41,7 +41,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     Servos servos;
     final double ARM_SCORE_DEGREES = 133;
     final double VIPER_SCORE_MM= 500;
-    final double ARM_GRAB_DEGREES = 10.8; // This is the position that the arm will be in when it grabs a sample
+    final double ARM_GRAB_DEGREES = 10; // This is the position that the arm will be in when it grabs a sample
 
 
     /** This is the variable where we store the state of our auto.

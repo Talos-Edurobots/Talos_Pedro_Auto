@@ -486,6 +486,7 @@ public class TeleOpBasket extends LinearOpMode {
 
     public void calibrateArm() {
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        wrist.setPosition(1);
         armMotor.setPower(0);
         sleep(1000);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -493,9 +494,11 @@ public class TeleOpBasket extends LinearOpMode {
     }
 
     public void calibrateArmWithRotation() {
+        wrist.setPosition(0);
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armMotor.setPower(-.5);
         sleep(1000);
+        armMotor.setPower(0);
         calibrateArm();
     }
 
