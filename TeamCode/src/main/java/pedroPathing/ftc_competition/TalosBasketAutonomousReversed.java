@@ -41,7 +41,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     Servos servos;
     final double ARM_SCORE_DEGREES = 133;
     final double VIPER_SCORE_MM= 500;
-    final double ARM_GRAB_DEGREES = 10; // This is the position that the arm will be in when it grabs a sample
+    final double ARM_GRAB_DEGREES = 9; // This is the position that the arm will be in when it grabs a sample
 
 
     /** This is the variable where we store the state of our auto.
@@ -84,7 +84,7 @@ public class TalosBasketAutonomousReversed extends OpMode {
     private final Pose scoreGrab3Pose = new Pose(19, 116.9, Math.toRadians(-45));
 
     /** Park Pose for our robot, after we do all of the scoring. */
-    private final Pose parkPose = new Pose(65, 98, Math.toRadians(90));
+    private final Pose parkPose = new Pose(60, 110, Math.toRadians(0));
 
     /** Park Control Pose for our robot, this is used to manipulate the bezier curve that we will create for the parking.
      * The Robot will not go to this pose, it is used a control point for our bezier curve. */
@@ -446,12 +446,14 @@ public class TalosBasketAutonomousReversed extends OpMode {
             case 38:
                 if(!(pathTimer.getElapsedTime() < 800)) {
                     viper.setPositionTicks(50);
+                    arm.setPositionDegrees(0);
                     follower.followPath(park, true);
                     setPathState(39);
                 }
                 break;
             case 39:
-                if(!viper.viper.isBusy()) {
+                if(!(pathTimer.getElapsedTime() < 800)) {
+                    servos.wristFolded();
 //                    arm.setPositionDegrees(ARM_GRAB_DEGREES);
                     setPathState(40);
                 }
@@ -465,13 +467,13 @@ public class TalosBasketAutonomousReversed extends OpMode {
             case 41:
                 if(!viper.viper.isBusy()) {
                     arm.setVelocity(3000);
-                    arm.setPositionDegrees(150);
+//                    arm.setPositionDegrees(150);
                     setPathState(42);
                 }
                 break;
             case 42:
                 if(!arm.arm.isBusy()) {
-                    arm.setRelaxed(true);
+//                    arm.setRelaxed(true);
                     setPathState(43);
                 }
                 break;
